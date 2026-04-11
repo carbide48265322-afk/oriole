@@ -10,8 +10,12 @@ import {
   LogoutOutlined,
   HistoryOutlined,
   BarChartOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
+import { useAuth } from '@/hooks/useAuth';
+import { useAppConfigStore } from '@/store';
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -66,17 +70,35 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  // 假用户数据（后续接入真实认证）
-  const mockUser = {
-    name: '审核员',
-    role: 'auditor',
+  const { isAuthenticated, user, logout } = useAuth();
+  const sidebarCollapsed = useAppConfigStore((state) => state.sidebarCollapsed);
+  const toggleSidebar = useAppConfigStore((state) => state.toggleSidebar);
+
+  const handleLogout = () => {
+    logout();
+    // 后续添加跳转逻辑
   };
 
+  // 更新用户菜单，添加登出处理
   const userMenu = (
-    <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+    <Dropdown
+      menu={{
+        items: userMenuItems,
+        onClick: ({ key }) => {
+          if (key === 'logout') {
+            handleLogout();
+          }
+        },
+      }}
+      placement="bottomRight"
+    >
       <Space className="cursor-pointer hover:opacity-80">
-        <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1677ff' }} />
-        <Text className="text-gray-700">{mockUser.name}</Text>
+        <Avatar
+          icon={<UserOutlined />}
+          src={user?.avatar}
+          style={{ backgroundColor: '#1677ff' }}
+        />
+        <Text className="text-gray-700">{user?.name || '未登录'}</Text>
       </Space>
     </Dropdown>
   );
@@ -84,6 +106,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
   return (
     <Layout className="min-h-screen">
       <Sider
+        trigger={null}
+        collapsible
+        collapsed={sidebarCollapsed}
         breakpoint="lg"
         collapsedWidth="80"
         className="shadow-md"
@@ -91,9 +116,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       >
         <div className="flex items-center justify-center h-16 border-b border-gray-200">
           <AuditOutlined className="text-2xl text-blue-500" />
-          <Text strong className="ml-2 text-lg">
-            Oriole
-          </Text>
+          {!sidebarCollapsed && (
+            <Text strong className="ml-2 text-lg">
+              Oriole
+            </Text>
+          )}
         </div>
         <Menu
           mode="inline"
@@ -104,7 +131,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </Sider>
       <Layout>
         {/* 顶栏 */}
-        <header className="bg-white shadow-sm h-16 flex items-center justify-end px-6">
+        <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+          <button
+            onClick={toggleSidebar}
+            className="text-lg hover:text-blue-500 transition-colors"
+          >
+            {sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          </button>
           {userMenu}
         </header>
         {/* 内容区 */}
