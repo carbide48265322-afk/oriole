@@ -6,11 +6,14 @@
  * - logout 方法清空状态
  * - 权限检查逻辑
  * - updateUser 方法
+ * - useMockUser Hook
  * 
  * 注意: Zustand store 测试需要每次重置状态
+ * useMockUser 是 React Hook,需要使用 renderHook 测试
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 import { useAuthStore, useMockUser } from './authStore';
 import type { UserInfo } from './types';
 
@@ -239,31 +242,44 @@ describe('authStore', () => {
   });
 
   describe('useMockUser Hook', () => {
-    it('应该返回 mock 用户信息', () => {
-      const { mockUser, loginAsMockUser } = useMockUser('admin');
-
-      expect(mockUser).toBeDefined();
-      expect(mockUser.role).toBe('admin');
-      expect(loginAsMockUser).toBeTypeOf('function');
+    it('应该返回 mock 用户信息并提供登录方法', () => {
+      const { result } = renderHook(() => useMockUser('admin'));
+      expect(result.current.mockUser).toBeDefined();
+      expect(result.current.mockUser.role).toBe('admin');
+      expect(result.current.mockUser.name).toBe('管理员');
+      act(() => {
+        result.current.loginAsMockUser();
+      });
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.user?.role).toBe('admin');
     });
-
-    it('loginAsMockUser 应该正确登录', () => {
-      const { loginAsMockUser } = useMockUser('auditor');
-      
-      loginAsMockUser();
-
+    it('应该能够以 auditor 角色登录', () => {
+      const { result } = renderHook(() => useMockUser('auditor'));
+      act(() => {
+        result.current.loginAsMockUser();
+      });
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(true);
       expect(state.user?.role).toBe('auditor');
-      expect(state.token).toMatch(/^mock-token-auditor-/);
+      expect(state.permissions).toContain('audit:review');
     });
-
-    it('应该支持不同的 mock 角色', () => {
-      const adminMock = useMockUser('admin');
-      const viewerMock = useMockUser('viewer');
-
-      expect(adminMock.mockUser.role).toBe('admin');
-      expect(viewerMock.mockUser.role).toBe('viewer');
+    it('应该允许多个不同的 mock 用户独立登录', () => {
+      const { result: adminResult } = renderHook(() => useMockUser('admin'));
+      const { result: viewerResult } = renderHook(() => useMockUser('viewer'));
+      act(() => {
+        adminResult.current.loginAsMockUser();
+      });
+      let state = useAuthStore.getState();
+      expect(state.user?.role).toBe('admin');
+      act(() => {
+        viewerResult.current.loginAsMockUser();
+      });
+      state = useAuthStore.getState();
+      expect(state.user?.role).toBe('viewer');
+      expect(state.permissions).toContain('audit:view');
+      expect(state.permissions).not.toContain('audit:review');
     });
   });
 });
+
