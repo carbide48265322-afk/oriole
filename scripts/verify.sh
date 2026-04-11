@@ -87,6 +87,23 @@ else
     warn_check "单元测试失败或无测试 (非阻断)"
 fi
 
+echo ""
+echo "📋 检查 5/5: 运行时控制台警告检查"
+# 启动开发服务器并检查控制台警告 (超时15秒)
+DEV_OUTPUT=$(timeout 15 pnpm dev 2>&1 || true)
+if echo "$DEV_OUTPUT" | grep -qi "deprecated\|warning\|warn"; then
+    WARN_LINES=$(echo "$DEV_OUTPUT" | grep -i "deprecated\|warning\|warn" | head -5)
+    warn_check "运行时发现控制台警告:\n$WARN_LINES"
+else
+    pass_check "运行时控制台无警告"
+fi
+
+# 保存最近的 verify 输出供自动进化触发器使用
+echo "$DEV_OUTPUT" > /tmp/verify-output.log 2>/dev/null || true
+
+# 自动进化触发
+bash scripts/auto-evolve-trigger.sh
+
 # 汇总报告
 echo ""
 echo "================================"

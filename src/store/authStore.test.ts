@@ -117,10 +117,9 @@ describe('authStore', () => {
 
       // 手动覆盖角色为未知角色
       const userWithUnknownRole = { ...unknownUser, role: 'unknown' as UserInfo['role'] };
-      
+
       const { login } = useAuthStore.getState();
-      // @ts-expect-error - 测试未知角色
-      login(userWithUnknownRole, 'token');
+      login(userWithUnknownRole as any, 'token');
 
       const state = useAuthStore.getState();
       expect(state.permissions).toEqual([]);

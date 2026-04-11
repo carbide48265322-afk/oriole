@@ -1,10 +1,20 @@
 /** @type {import('next').NextConfig} */
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   basePath: process.env.NEXT_PUBLIC_MICRO_APP === 'true' ? '/oriole' : '',
+  serverExternalPackages: [],
   experimental: {
-    serverComponentsExternalPackages: [],
+    optimizePackageImports: ['antd', '@ant-design/icons'],
+  },
+  turbopack: {
+    root: __dirname,
   },
   async headers() {
     return [

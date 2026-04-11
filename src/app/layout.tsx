@@ -1,10 +1,21 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { AntdRegistry } from '@ant-design/nextjs-registry';
 import './globals.css';
 import AntdProvider from '@/components/AntdProvider';
 import { MockInitializer } from '@/components/MockInitializer';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  variable: '--font-inter',
+});
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: 'Oriole - 内容审核平台',
@@ -19,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={inter.className}>
-        <MockInitializer />
-        <AntdProvider>{children}</AntdProvider>
+        <AntdRegistry>
+          <MockInitializer />
+          <AntdProvider>{children}</AntdProvider>
+        </AntdRegistry>
       </body>
     </html>
   );

@@ -166,32 +166,32 @@ export default function AppLayout({ children }: AppLayoutProps) {
       }}
       placement="bottomRight"
     >
-      <Space className="cursor-pointer hover:opacity-80">
+      <Space style={{ cursor: 'pointer' }}>
         <Avatar
           icon={<UserOutlined />}
           src={user?.avatar}
           style={{ backgroundColor: '#1677ff' }}
         />
-        <Text className="text-gray-700">{user?.name || '未登录'}</Text>
+        <Text style={{ color: '#374151' }}>{user?.name || '未登录'}</Text>
       </Space>
     </Dropdown>
   );
 
   return (
-    <Layout className="min-h-screen">
+    <Layout style={{ minHeight: '100vh' }}>
       <Sider
         trigger={null}
         collapsible
         collapsed={sidebarCollapsed}
         breakpoint="lg"
         collapsedWidth="80"
-        className="shadow-md"
+        style={{ boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
         theme="light"
       >
-        <div className="flex items-center justify-center h-16 border-b border-gray-200">
-          <AuditOutlined className="text-2xl text-blue-500" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 64, borderBottom: '1px solid #e5e7eb' }}>
+          <AuditOutlined style={{ fontSize: 24, color: '#1677ff' }} />
           {!sidebarCollapsed && (
-            <Text strong className="ml-2 text-lg">
+            <Text strong style={{ marginLeft: 8, fontSize: 18 }}>
               Oriole
             </Text>
           )}
@@ -201,22 +201,22 @@ export default function AppLayout({ children }: AppLayoutProps) {
           selectedKeys={selectedKeys}
           items={sidebarItems}
           onClick={handleMenuClick}
-          className="border-r-0 mt-2"
+          style={{ borderRight: 'none', marginTop: 8 }}
         />
       </Sider>
       <Layout>
         {/* 顶栏 */}
-        <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+        <header style={{ background: '#fff', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px' }}>
           <button
             onClick={toggleSidebar}
-            className="text-lg hover:text-blue-500 transition-colors"
+            style={{ fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }}
           >
             {sidebarCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           </button>
           {userMenu}
         </header>
         {/* 内容区 */}
-        <main className="flex-1 bg-gray-50 p-6 overflow-auto">
+        <main style={{ flex: 1, background: '#f9fafb', padding: 24, overflow: 'auto' }}>
           {children}
         </main>
       </Layout>
