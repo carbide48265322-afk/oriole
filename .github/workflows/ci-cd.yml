@@ -2,7 +2,7 @@ name: CI/CD Pipeline with QA
 
 on:
   push:
-    branches: [dev, main]
+    branches: [dev, main, 'feature/**']
   pull_request:
     branches: [dev, main]
 
