@@ -31,18 +31,20 @@ case $ACTION in
         echo ""
         
         # 创建快照 (排除 node_modules, .next 等)
+        # 动态构建文件列表
+        FILES_TO_SNAP="src/ .qwen/ docs/ scripts/"
+        [ -f "package.json" ] && FILES_TO_SNAP="$FILES_TO_SNAP package.json"
+        [ -f "tsconfig.json" ] && FILES_TO_SNAP="$FILES_TO_SNAP tsconfig.json"
+        [ -f "next.config.js" ] && FILES_TO_SNAP="$FILES_TO_SNAP next.config.js"
+        [ -f "next.config.mjs" ] && FILES_TO_SNAP="$FILES_TO_SNAP next.config.mjs"
+        
         tar -czf "$SNAPSHOT_FILE" \
             --exclude='node_modules' \
             --exclude='.next' \
             --exclude='.snapshots' \
             --exclude='.agent-logs' \
             --exclude='.git' \
-            src/ \
-            .qwen/ \
-            docs/ \
-            scripts/ \
-            package.json \
-            tsconfig.json \
+            $FILES_TO_SNAP \
             2>/dev/null
         
         if [ $? -eq 0 ]; then
