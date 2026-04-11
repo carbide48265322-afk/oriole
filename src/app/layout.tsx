@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import './globals.css';
 import AntdProvider from '@/components/AntdProvider';
+import QueryProvider from '@/components/QueryProvider';
 import { MockInitializer } from '@/components/MockInitializer';
 
 const inter = Inter({
@@ -31,8 +32,10 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className={inter.className}>
         <AntdRegistry>
-          <MockInitializer />
-          <AntdProvider>{children}</AntdProvider>
+          <QueryProvider>
+            <MockInitializer />
+            <AntdProvider>{children}</AntdProvider>
+          </QueryProvider>
         </AntdRegistry>
       </body>
     </html>

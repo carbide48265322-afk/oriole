@@ -33,6 +33,18 @@ const sidebarItems = [
     path: '/',
   },
   {
+    key: 'audit-policy',
+    icon: <FileTextOutlined />,
+    label: '审核策略',
+    path: '/audit-policy',
+  },
+  {
+    key: 'audit-dimension',
+    icon: <FileTextOutlined />,
+    label: '审核维度',
+    path: '/audit-dimension',
+  },
+  {
     key: 'tasks',
     icon: <FileTextOutlined />,
     label: '审核任务',
@@ -80,6 +92,8 @@ const sidebarItems = [
 const pathToKeyMap: Record<string, string> = {
   '/': 'dashboard',
   '/main': 'dashboard',
+  '/audit-policy': 'audit-policy',
+  '/audit-dimension': 'audit-dimension',
   '/tasks': 'tasks',
   '/ai-review': 'ai-review',
   '/manual-review': 'manual-review',
@@ -92,6 +106,8 @@ const pathToKeyMap: Record<string, string> = {
 // 菜单 key → 路由映射（用于点击跳转）
 const keyToPathMap: Record<string, string> = {
   dashboard: '/',
+  'audit-policy': '/audit-policy',
+  'audit-dimension': '/audit-dimension',
   tasks: '/tasks',
   'ai-review': '/ai-review',
   'manual-review': '/manual-review',

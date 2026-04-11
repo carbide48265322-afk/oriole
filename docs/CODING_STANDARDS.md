@@ -51,6 +51,131 @@
 | 2025-04-11 | 首页/布局使用 Tailwind 类名（技术栈未提及） | 全部改为 antd 组件 + inline style |
 | 2025-04-11 | 移除 Tailwind 依赖和配置 | 技术栈只写了 antd，不需要的依赖全部清理 |
 
+## 🔧 已发现的组件使用问题记录
+
+> **原则**：发现问题时记录到此处，后续代码自动遵循。
+
+### Ant Design 组件使用规范
+
+| 日期 | 组件 | 问题 | 正确用法 |
+|------|------|------|----------|
+| 2026-04-11 | Transfer | `listStyle` 属性已废弃 | 使用 `styles={{ section: { width, height } }}` |
+| 2026-04-11 | message | 静态函数 `message.success()` 无法消费动态主题上下文 | 使用 `App` 组件包裹应用，组件内用 `const { message } = App.useApp()` |
+| 2026-04-11 | Form.useForm | `destroyOnHidden` 的 Modal 关闭后调用 `resetFields()` 会报警告 | 移除 `open=false` 时的 `resetFields()`，由 `destroyOnHidden` 自动销毁 |
+
+### 表单弹窗状态管理规范
+
+**问题场景**：表单弹窗组件在新增/编辑切换时，表单内容显示错误或残留。
+
+**正确实现模式**：
+
+```typescript
+// ✅ 正确：表单组件状态同步
+export default function AuditForm({ mode, initialValues, onSubmit, onCancel, open }: Props) {
+  const [form] = Form.useForm();
+
+  // 1. useEffect 只在 open=true 时同步数据
+  useEffect(() => {
+    if (open) {
+      if (initialValues) {
+        form.setFieldsValue(initialValues); // 编辑模式
+      } else {
+        form.resetFields(); // 新增模式
+        form.setFieldsValue({ name: '', description: '' }); // 设置默认值
+      }
+    }
+    // 2. 不在这里 resetFields！destroyOnHidden 会自动销毁
+  }, [open, initialValues, form]);
+
+  // 3. handleFinish 中不要调用 resetFields()
+  const handleFinish = (values) => {
+    onSubmit(values);
+    // 不在这里 resetFields，等弹窗关闭时再重置
+  };
+
+  // 4. 取消时重置
+  const handleCancel = () => {
+    form.resetFields();
+    onCancel();
+  };
+
+  return (
+    <Modal open={open} destroyOnHidden onCancel={handleCancel}>
+      <Form
+        key={mode === 'edit' && initialValues ? `edit-${initialValues.id}` : 'create'}
+        form={form}
+        // 5. 不要设置 initialValues 属性！由 useEffect 控制
+        onFinish={handleFinish}
+      >
+        {/* 表单项 */}
+      </Form>
+    </Modal>
+  );
+}
+```
+
+**关键规则**：
+1. ✅ 移除 Form 的 `initialValues` 属性，完全由 `useEffect` + `setFieldsValue` 控制
+2. ✅ 使用 `key` 属性强制 React 重新渲染 Form 实例
+3. ✅ `handleFinish` 中不要调用 `resetFields()`，避免用户看到空表单闪现
+4. ✅ `destroyOnHidden` 的 Modal 关闭时不要调用 `resetFields()`，会自动销毁
+5. ✅ 新增模式时显式设置默认值 `form.setFieldsValue({ name: '', description: '' })`
+
+### 表格响应式布局规范
+
+**问题场景**：表格在小屏幕下内容溢出，没有横向滚动。
+
+**正确实现**：
+
+```typescript
+// ✅ 正确：给 Table 添加 scroll 属性
+<Table
+  columns={columns}
+  dataSource={data}
+  scroll={{ x: 'max-content' }} // 自动计算最小宽度，支持横向滚动
+/>
+```
+
+### 按钮防重复点击规范
+
+**问题场景**：保存、删除等调接口的按钮没有防止重复点击，用户快速点击会重复提交。
+
+**正确实现模式**：
+
+```typescript
+// ✅ 正确：使用 React Query 的 isPending 状态
+const createMutation = useMutation({
+  mutationFn: createApi,
+  onSuccess: () => { /* ... */ },
+});
+
+// Modal 添加 confirmLoading
+<Modal
+  confirmLoading={createMutation.isPending || updateMutation.isPending}
+  onOk={() => form.submit()}
+>
+  <Form onFinish={handleFinish} />
+</Modal>
+
+// 删除按钮添加 loading
+<Button
+  danger
+  loading={deleteMutation.isPending}
+  onClick={() => deleteMutation.mutate(id)}
+>
+  删除
+</Button>
+```
+
+**通用 Hook**: 项目提供了 `src/hooks/useLoading.ts`，可用于自定义 loading 状态管理。
+
+**关键规则**：
+1. ✅ 所有调接口的按钮必须有 loading 状态
+2. ✅ Modal 使用 `confirmLoading` 防止重复提交
+3. ✅ Button 使用 `loading` 属性显示加载状态
+4. ✅ 使用 React Query 的 `isPending` 属性（推荐）
+5. ✅ 或使用 `useLoading` hook 自定义 loading 状态
+
 ##  已发现的 API 兼容问题记录
 
 > **原则**：发现问题时记录到此处，后续代码自动遵循。不要每次去查所有依赖。
