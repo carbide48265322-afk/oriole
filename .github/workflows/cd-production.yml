@@ -58,13 +58,14 @@ jobs:
             package.json
           retention-days: 7
 
-  # ========== 部署到 Vercel (可选) ==========
+  # ========== 部署到 Vercel (可选，需配置 Secrets) ==========
+  # 启用条件：在 Settings > Secrets 中配置 VERCEL_TOKEN、VERCEL_ORG_ID、VERCEL_PROJECT_ID
   deploy-vercel:
     name: 🚀 部署到 Vercel
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [build-production]
-    if: secrets.VERCEL_TOKEN != ''
+    if: false # 默认禁用，配置 Secrets 后改为 true
 
     steps:
       - name: 📥 检出代码
