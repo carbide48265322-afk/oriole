@@ -43,7 +43,7 @@ export default function Home() {
             </div>
           </div>
 
-          <Link href="/main">
+          <Link href="/tasks">
             <Button type="primary" size="large" icon={<ArrowRightOutlined />} className="text-lg px-8 py-6">
               进入审核工作台
             </Button>
