@@ -2,12 +2,12 @@
 name: base-generator
 description: 代码实现专家。负责根据 Task 要求编写高质量代码和单元测试，完成后自动运行 verify.sh 验证。什么代码都写，不分前端/后端/UI。
 tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
+  - read_file
+  - write_file
+  - edit
+  - run_shell_command
+  - glob
+  - grep_search
 disallowedTools: []
 model: inherit
 permissionMode: default

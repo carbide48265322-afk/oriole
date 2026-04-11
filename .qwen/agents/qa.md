@@ -2,13 +2,13 @@
 name: qa
 description: QA 验收专家，专注于验证代码是否满足 Spec 中的验收标准，输出结构化验证报告。
 tools:
-  - Read
-  - Bash
-  - Glob
-  - Grep
+  - read_file
+  - run_shell_command
+  - glob
+  - grep_search
 disallowedTools:
-  - Write
-  - Edit
+  - write_file
+  - edit
 model: inherit
 permissionMode: default
 maxTurns: 5
@@ -34,6 +34,8 @@ pnpm test
 
 ### 3. 运行 E2E 测试 (标准流程)
 
+> 💡 Playwright 会自动从 `playwright.config.ts` 读取 `baseURL`（支持 `BASE_URL` 环境变量）
+
 **步骤 1**: 检查开发服务器是否运行
 ```bash
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
@@ -46,7 +48,6 @@ fi
 
 **步骤 2**: 运行 E2E 测试
 ```bash
-cd /path/to/project
 npx playwright test --project=chrome
 ```
 

@@ -2,13 +2,13 @@
 name: reviewer
 description: 苛刻的代码审查专家，专注于发现代码中的问题和潜在风险，输出结构化 VERDICT 报告。
 tools:
-  - Read
-  - Bash
-  - Glob
-  - Grep
+  - read_file
+  - run_shell_command
+  - glob
+  - grep_search
 disallowedTools:
-  - Write
-  - Edit
+  - write_file
+  - edit
 model: inherit
 permissionMode: default
 maxTurns: 3
