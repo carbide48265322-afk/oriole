@@ -1,14 +1,14 @@
 {
   "spec": "base-environment",
   "dag_file": ".qwen/specs/base-environment/pipeline.json",
-  "current_node": "task-2",
+  "current_node": "task-3",
   "status": "running",
   "tasks": {
     "total": 8,
-    "current": 2,
-    "completed": ["task-1"],
+    "current": 3,
+    "completed": ["task-1", "task-2"],
     "failed": []
   },
   "startedAt": "2026-04-11T11:45:00Z",
-  "lastUpdated": "2026-04-11T11:55:00Z"
+  "lastUpdated": "2026-04-11T12:05:00Z"
 }
