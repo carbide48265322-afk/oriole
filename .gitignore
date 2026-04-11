@@ -38,13 +38,9 @@ pnpm-debug.log*
 Thumbs.db
 
 # ========== AI Harness 内部工具（不提交） ==========
-.qwen/
 .agent-logs/
 .snapshots/
 .pipeline-status.json
-scripts/
-docs/
-GETTING_STARTED.md
 
 # ========== 测试覆盖率 ==========
 coverage/

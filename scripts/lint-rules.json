@@ -1,0 +1,71 @@
+{
+  "version": "1.0.0",
+  "stack": "nextjs-typescript",
+  "rules": [
+    {
+      "id": "TS001",
+      "name": "no-implicit-any",
+      "severity": "error",
+      "command": "grep -r ': any' src/ --include='*.ts' --include='*.tsx' | grep -v 'node_modules' | grep -v '.test.' || true",
+      "description": "禁止隐式 any 类型",
+      "ignore_if": "test files only"
+    },
+    {
+      "id": "TS002",
+      "name": "no-ts-ignore",
+      "severity": "error",
+      "command": "grep -r '@ts-ignore' src/ --include='*.ts' --include='*.tsx' | grep -v 'node_modules' || true",
+      "description": "禁止使用 @ts-ignore"
+    },
+    {
+      "id": "SEC001",
+      "name": "no-hardcoded-secrets",
+      "severity": "error",
+      "command": "grep -rE '(api_key|secret|password|token)\\s*=\\s*[\"\\'][^\"\\']{8,}[\"\\']' src/ --include='*.ts' --include='*.tsx' --include='*.js' | grep -v 'node_modules' | grep -v '.env' || true",
+      "description": "禁止硬编码密钥"
+    },
+    {
+      "id": "SEC002",
+      "name": "no-dangerously-set-inner-html",
+      "severity": "warning",
+      "command": "grep -r 'dangerouslySetInnerHTML' src/ --include='*.tsx' | grep -v 'node_modules' | grep -v 'DOMPurify' || true",
+      "description": "避免直接使用 dangerouslySetInnerHTML (XSS 风险)"
+    },
+    {
+      "id": "ARCH001",
+      "name": "api-auth-check",
+      "severity": "error",
+      "command": "find src/app/api -name 'route.ts' -exec grep -L 'getServerSession\\|auth' {} \\; 2>/dev/null || true",
+      "description": "API 路由必须包含认证检查"
+    },
+    {
+      "id": "ARCH002",
+      "name": "input-validation-check",
+      "severity": "warning",
+      "command": "grep -rE 'export async function (POST|PUT|PATCH|DELETE)' src/app/api --include='*.ts' -l | xargs grep -L 'zod\\|validate\\|schema' 2>/dev/null || true",
+      "description": "Mutation API 应使用 Zod 验证输入"
+    },
+    {
+      "id": "QUAL001",
+      "name": "no-console-log-in-production",
+      "severity": "warning",
+      "command": "grep -r 'console.log' src/ --include='*.ts' --include='*.tsx' | grep -v 'node_modules' | grep -v '.test.' || true",
+      "description": "生产代码应避免使用 console.log",
+      "ignore_if": "development and test files"
+    },
+    {
+      "id": "QUAL002",
+      "name": "error-handling-check",
+      "severity": "warning",
+      "command": "grep -rE '(async|await|Promise)' src/ --include='*.ts' --include='*.tsx' -l | xargs grep -L 'try.*catch\\|.catch(' 2>/dev/null || true",
+      "description": "异步操作应有错误处理"
+    }
+  ],
+  "ignore_patterns": [
+    "node_modules/",
+    ".next/",
+    ".qwen/",
+    "scripts/",
+    "docs/"
+  ]
+}
