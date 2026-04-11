@@ -89,6 +89,18 @@ const pathToKeyMap: Record<string, string> = {
   '/settings': 'settings',
 };
 
+// 菜单 key → 路由映射（用于点击跳转）
+const keyToPathMap: Record<string, string> = {
+  dashboard: '/',
+  tasks: '/tasks',
+  'ai-review': '/ai-review',
+  'manual-review': '/manual-review',
+  'focus-review': '/focus-review',
+  history: '/history',
+  stats: '/stats',
+  settings: '/settings',
+};
+
 const userMenuItems: MenuProps['items'] = [
   {
     key: 'profile',
@@ -130,9 +142,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   // 菜单点击处理函数
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
-    const item = sidebarItems.find((item) => item.key === key);
-    if (item?.path) {
-      router.push(item.path);
+    const path = keyToPathMap[key];
+    if (path) {
+      router.push(path);
     }
   };
 

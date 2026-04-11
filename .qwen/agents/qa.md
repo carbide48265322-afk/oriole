@@ -11,7 +11,7 @@ disallowedTools:
   - Edit
 model: inherit
 permissionMode: default
-maxTurns: 3
+maxTurns: 5
 effort: high
 ---
 
@@ -25,9 +25,45 @@ effort: high
 ### 1. 读取验收标准
 读取 `.qwen/specs/<feature>/SPEC.md` 中的验收标准列表。
 
-### 2. 逐项验证
+### 2. 运行单元测试
+```bash
+pnpm test
+```
+- 验证新增/修改代码的单元测试
+- 检查覆盖率是否达标 (> 80%)
+
+### 3. 运行 E2E 测试 (标准流程)
+
+**步骤 1**: 检查开发服务器是否运行
+```bash
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+if [ "$STATUS" != "200" ]; then
+  echo "开发服务器未运行，正在启动..."
+  pnpm dev &
+  sleep 5
+fi
+```
+
+**步骤 2**: 运行 E2E 测试
+```bash
+cd /path/to/project
+npx playwright test --project=chrome
+```
+
+**步骤 3**: 收集测试结果
+- 如果全部通过 → E2E PASS
+- 如果有失败 → 记录失败的测试用例
+
+**步骤 4**: 清理开发服务器（如果是 QA 启动的）
+```bash
+kill $(lsof -ti:3000) 2>/dev/null || true
+```
+
+### 4. 逐项验证
 针对每项验收标准，检查代码实现是否满足要求：
 - 功能是否完整实现？
+- 交互是否符合 Spec 描述？
+- 边界情况是否处理？
 - 边界情况是否处理？
 - 非功能性需求是否满足？（性能、安全、可访问性）
 
