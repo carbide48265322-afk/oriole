@@ -71,7 +71,7 @@ describe('useLoading', () => {
       const mockFn = vi.fn().mockResolvedValue('test-result');
       const wrappedFn = result.current.withLoading(mockFn);
 
-      let returnValue: string;
+      let returnValue: string = '';
       await act(async () => {
         returnValue = await wrappedFn('arg1', 'arg2');
       });
