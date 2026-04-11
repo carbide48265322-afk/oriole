@@ -1,0 +1,3 @@
+## Qwen Added Memories
+- 【协调者工作流铁律】Coordinator 绝对禁止写代码、验证代码、跳过审查。正确流程：1. 创建 SPEC/PLAN/TASKS 文档 → 2. 委派给 base-generator Agent 执行代码 → 3. 委派给 reviewer/harness-review 审查代码 → 4. Review VERDICT: PASS 后委派给 qa Agent 验收 → 5. QA VERDICT: PASS 后才能 git commit。Coordinator 只能：读文件、生成文档、启动子 Agent、更新 DAG 状态、压缩上下文。严禁使用 write_file/edit 修改 src/ 下代码，严禁运行 verify.sh/type-check/lint 验证代码。
+- 【审查流程详解】Generator 返回后：1. 标记 Task 为 [x] Archived → 2. 追加 Diff 到 CHANGELOG.md → 3. 启动 harness-review Skill（不是内置/review）→ 4. Review 审查 SPEC/PLAN 合规性 + CODING_STANDARDS → 5. Review FAIL 则生成 Fix Task 给 Generator，最多 3 轮 → 6. Review PASS → 启动 qa Agent → 7. QA 验证 SPEC.md 验收标准 + 功能实现 → 8. QA FAIL 生成 Bug Fix Task → 9. QA PASS → Coordinator 才能 git commit。修复循环硬性限制：最多 3 轮，超过强制终止，请求人工介入。

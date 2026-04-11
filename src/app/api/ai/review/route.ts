@@ -36,7 +36,7 @@ const REVIEW_PROMPT = `你是一个专业的内容审核员。请审核以下内
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { content, contentType, stream = false } = body;
+    const { content } = body;
 
     if (!content) {
       return NextResponse.json(
@@ -85,8 +85,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 流式审核（后续实现）
-export async function POST_STREAM(request: NextRequest) {
+/**
+ * 流式审核函数（预留）
+ * 
+ * TODO: 后续实现流式审核功能
+ * 注意：此函数当前未导出，实现完成后需改为独立的 API 路由
+ */
+// 预留函数，后续实现流式审核
+async function _POST_STREAM(request: NextRequest) {
   try {
     const body = await request.json();
     const { content } = body;

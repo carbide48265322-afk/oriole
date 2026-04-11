@@ -25,7 +25,9 @@ function initApp(props: Record<string, unknown> = {}) {
   };
   
   if (token) {
-    // 存储 token（后续接入真实认证）
+    // TODO: 当前使用 localStorage 存储 token 存在 XSS 风险
+    // 后续应改用 httpOnly cookie 存储，由服务端设置
+    // 参考：https://owasp.org/www-community/controls/HttpOnly
     localStorage.setItem('auth_token', token);
   }
   

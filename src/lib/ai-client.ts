@@ -1,6 +1,9 @@
 /**
  * AI 客户端配置
  * 
+ * ⚠️ 注意：此模块仅在服务端使用（Server Components / API Routes）
+ * 因为包含 API Key 等敏感信息，不应暴露给客户端
+ * 
  * 支持通义千问 (Qwen) 和美团 Longcat
  * 两者都兼容 OpenAI API 格式
  */

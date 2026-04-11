@@ -4,16 +4,36 @@
  * 负责创建和管理应用窗口
  */
 
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
+import { readFileSync } from 'fs';
 
 // 开发环境 URL (Next.js 开发服务器)
 const DEV_URL = 'http://localhost:3000';
 // 生产环境 URL (本地构建的 HTML)
+// TODO: 后续需确认 Electron 构建方式（electron-builder / electron-forge）
+// 当前路径假设为静态导出 (next export)，实际可能需要调整为：
+// - `file://${path.join(__dirname, '../out/index.html')}` (静态导出)
+// - 或加载 Next.js standalone server (SSR 模式)
 const PROD_URL = `file://${path.join(__dirname, '../out/index.html')}`;
 
 // 保持窗口引用，防止被垃圾回收
 let mainWindow: BrowserWindow | null = null;
+
+/**
+ * IPC Handler: 获取应用版本号
+ * 供渲染进程通过 window.electron.getVersion() 调用
+ */
+ipcMain.handle('get-version', () => {
+  try {
+    const packageJson = JSON.parse(
+      readFileSync(path.join(__dirname, '../package.json'), 'utf-8')
+    );
+    return packageJson.version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+});
 
 /**
  * 创建主窗口
