@@ -54,3 +54,8 @@ coverage/
 *.tsbuildinfo
 .turbo
 .vercel
+
+# ========== 调试截图 ==========
+blank-areas*.png
+cls-verification*.png
+height-fixed.png
