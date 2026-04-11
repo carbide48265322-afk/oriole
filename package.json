@@ -10,7 +10,10 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.52",
+    "@ai-sdk/provider": "^3.0.8",
     "@ant-design/icons": "^6.1.1",
+    "ai": "^6.0.158",
     "antd": "^6.3.5",
     "next": "^14.2.0",
     "qiankun": "^2.10.16",
