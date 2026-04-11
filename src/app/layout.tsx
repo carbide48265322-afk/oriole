@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import AntdProvider from '@/components/AntdProvider';
+import { MockInitializer } from '@/components/MockInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={inter.className}>
+        <MockInitializer />
         <AntdProvider>{children}</AntdProvider>
       </body>
     </html>
