@@ -1,0 +1,63 @@
+name: Code Review Assistant
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # ========== 自动生成 PR 描述 ==========
+  pr-description:
+    name: 📝 生成 PR 描述
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📊 生成变更统计
+        run: |
+          echo "## 📊 变更统计" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 指标 | 数量 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          
+          CHANGED_FILES=$(git diff --name-only HEAD~1..HEAD | wc -l)
+          ADDED_LINES=$(git diff --stat HEAD~1..HEAD | tail -1 | grep -o '[0-9]* insertion' | grep -o '[0-9]*' || echo "0")
+          DELETED_LINES=$(git diff --stat HEAD~1..HEAD | tail -1 | grep -o '[0-9]* deletion' | grep -o '[0-9]*' || echo "0")
+          
+          echo "| 修改文件 | $CHANGED_FILES |" >> $GITHUB_STEP_SUMMARY
+          echo "| 新增行数 | ${ADDED_LINES:-0} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 删除行数 | ${DELETED_LINES:-0} |" >> $GITHUB_STEP_SUMMARY
+
+  # ========== 检查提交信息规范 ==========
+  commit-message-check:
+    name: ✅ 检查提交信息规范
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 检查提交信息
+        run: |
+          echo "## 📝 提交信息检查" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          COMMITS=$(git log --oneline HEAD~${{ github.event.pull_request.commits }}..HEAD)
+          echo "$COMMITS" | while read -r line; do
+            HASH=$(echo "$line" | cut -d' ' -f1)
+            MSG=$(echo "$line" | cut -d' ' -f2-)
+            
+            # 检查是否遵循 conventional commits 规范
+            if echo "$MSG" | grep -qE "^(feat|fix|docs|style|refactor|test|chore|perf|ci|build|revert)(\(.+\))?:.+"; then
+              echo "- ✅ $line" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "- ⚠️ $line (建议遵循 conventional commits 规范)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done

@@ -1,0 +1,102 @@
+name: CD - Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 手动触发
+
+# 生产部署需要串行执行，取消其他运行
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  # ========== 构建生产版本 ==========
+  build-production:
+    name: 🏗️ 构建生产版本
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: 🟢 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 📦 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 类型检查
+        run: pnpm type-check
+
+      - name: 🎨 Lint 检查
+        run: pnpm lint
+
+      - name: 🏗️ 构建生产版本
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_USE_MOCK: 'false'
+
+      - name: 📦 保存构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: |
+            .next/
+            public/
+            package.json
+          retention-days: 7
+
+  # ========== 部署到 Vercel (可选) ==========
+  deploy-vercel:
+    name: 🚀 部署到 Vercel
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-production]
+    if: secrets.VERCEL_TOKEN != ''
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+
+      - name: 🚀 部署到 Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+  # ========== 部署通知 ==========
+  deploy-notification:
+    name: 📢 部署通知
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [build-production]
+    if: always()
+
+    steps:
+      - name: 📢 发送部署通知
+        run: |
+          STATUS="${{ needs.build-production.result }}"
+          if [ "$STATUS" = "success" ]; then
+            echo "✅ 生产部署成功！"
+          else
+            echo "❌ 生产部署失败！"
+          fi

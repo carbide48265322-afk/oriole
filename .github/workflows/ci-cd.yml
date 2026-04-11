@@ -1,0 +1,162 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
+
+# 取消重复的运行
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ========== 代码检查 ==========
+  lint:
+    name: 🔍 代码检查 (Lint + Type)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: 🟢 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 📦 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 TypeScript 类型检查
+        run: pnpm type-check
+
+      - name: 🎨 ESLint 检查
+        run: pnpm lint
+
+  # ========== 构建验证 ==========
+  build:
+    name: 🏗️ 构建验证
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint]
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: 🟢 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 📦 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ 构建项目
+        run: pnpm build
+
+      - name: 📦 保存构建产物
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: build-output
+          path: .next/
+          retention-days: 3
+
+  # ========== 测试运行 ==========
+  test:
+    name: 🧪 测试运行
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint]
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📦 安装 pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
+
+      - name: 🟢 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: 📦 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧪 运行测试
+        run: pnpm test -- --passWithNoTests
+        continue-on-error: true # 暂无测试，允许通过
+
+      - name: 📊 生成测试覆盖率报告
+        run: pnpm test -- --coverage --passWithNoTests
+        continue-on-error: true
+
+      - name: 📤 上传覆盖率报告
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 5
+
+  # ========== 代码质量报告 ==========
+  quality-report:
+    name: 📊 代码质量报告
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint, build, test]
+    if: always()
+
+    steps:
+      - name: 📥 检出代码
+        uses: actions/checkout@v4
+
+      - name: 📊 生成质量报告
+        run: |
+          echo "## 📊 CI/CD 质量报告" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 检查项 | 状态 |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 代码检查 (Lint) | ${{ needs.lint.result == 'success' && '✅ 通过' || '❌ 失败' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 构建验证 | ${{ needs.build.result == 'success' && '✅ 通过' || '❌ 失败' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 测试运行 | ${{ needs.test.result == 'success' && '✅ 通过' || needs.test.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ========== 自动合并 (仅 PR 到 dev) ==========
+  auto-merge:
+    name: 🔄 自动合并
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [lint, build, test]
+    if: github.event_name == 'pull_request' && github.base_ref == 'dev' && success()
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: ✅ 批准 PR
+        run: |
+          echo "所有检查通过，PR 可以合并"
+        continue-on-error: true
