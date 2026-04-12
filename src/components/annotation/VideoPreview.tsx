@@ -26,13 +26,10 @@ export default function VideoPreview({
       preload: 'auto',
       fluid: true,
       poster: poster || undefined,
-      sources: [
-        {
-          src,
-          type: 'video/mp4',
-        },
-      ],
     });
+
+    // 设置视频源，不指定类型让 video.js 自动检测
+    player.src(src);
 
     player.on('error', () => {
       setError(true);
