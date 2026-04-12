@@ -247,6 +247,41 @@ describe('AuditPreview', () => {
     expect(screen.getByText('缩小')).toBeInTheDocument();
     expect(screen.getByText('旋转')).toBeInTheDocument();
   });
+
+  it('应该在有 previewData 时渲染 AnnotationPreview', () => {
+    const itemWithPreview: AuditItem = {
+      id: '1',
+      type: 'image',
+      title: '测试图片',
+      status: 'pending',
+      content: 'https://example.com/image.jpg',
+      createdAt: '2024-01-01',
+      previewData: {
+        type: 'image',
+        url: 'https://example.com/image.jpg',
+        title: '测试图片',
+      },
+    };
+
+    render(<AuditPreview item={itemWithPreview} />);
+    // AnnotationPreview 会渲染图片，验证没有显示占位提示
+    expect(screen.queryByText('图片预览组件待接入')).not.toBeInTheDocument();
+    expect(screen.queryByText('暂无预览数据')).not.toBeInTheDocument();
+  });
+
+  it('应该在没有 previewData 时显示占位提示', () => {
+    const itemWithoutPreview: AuditItem = {
+      id: '1',
+      type: 'image',
+      title: '测试图片',
+      status: 'pending',
+      content: 'https://example.com/image.jpg',
+      createdAt: '2024-01-01',
+    };
+
+    render(<AuditPreview item={itemWithoutPreview} />);
+    expect(screen.getByText('图片预览组件待接入')).toBeInTheDocument();
+  });
 });
 
 describe('AuditWorkspace', () => {

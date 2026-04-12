@@ -12,6 +12,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/images/001.jpg',
     createdAt: '2024-01-15 10:30:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/001.jpg',
+      title: '用户上传图片-001',
+    },
   },
   {
     id: '2',
@@ -20,6 +25,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/images/002.jpg',
     createdAt: '2024-01-15 11:00:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/002.jpg',
+      title: '用户上传图片-002',
+    },
   },
   {
     id: '3',
@@ -28,6 +38,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: 'https://example.com/images/003.jpg',
     createdAt: '2024-01-15 11:30:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/003.jpg',
+      title: '商品图片-003',
+    },
   },
   {
     id: '4',
@@ -36,6 +51,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'rejected',
     content: 'https://example.com/images/004.jpg',
     createdAt: '2024-01-15 12:00:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/004.jpg',
+      title: '头像图片-004',
+    },
   },
   {
     id: '5',
@@ -44,6 +64,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/images/005.jpg',
     createdAt: '2024-01-15 12:30:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/005.jpg',
+      title: 'Banner图片-005',
+    },
   },
   {
     id: '6',
@@ -52,6 +77,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/images/006.jpg',
     createdAt: '2024-01-15 13:00:00',
+    previewData: {
+      type: 'image',
+      url: 'https://example.com/images/006.jpg',
+      title: '缩略图-006',
+    },
   },
 ];
 

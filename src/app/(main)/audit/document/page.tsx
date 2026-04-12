@@ -12,6 +12,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: '这是一篇需要审核的文章内容，包含可能的敏感信息...',
     createdAt: '2024-01-15 08:00:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/001.txt',
+      title: '文章-001',
+    },
   },
   {
     id: '2',
@@ -20,6 +25,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: '用户评论：这个产品真的很不错，推荐大家购买！',
     createdAt: '2024-01-15 08:30:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/002.txt',
+      title: '评论-002',
+    },
   },
   {
     id: '3',
@@ -28,6 +38,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: '分享一些日常生活的小确幸，感受生活的美好。',
     createdAt: '2024-01-15 09:00:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/003.txt',
+      title: '帖子-003',
+    },
   },
   {
     id: '4',
@@ -36,6 +51,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'rejected',
     content: '包含违规内容的私信内容示例...',
     createdAt: '2024-01-15 09:30:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/004.txt',
+      title: '私信-004',
+    },
   },
   {
     id: '5',
@@ -44,6 +64,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: '这是一份需要审核的文档，可能包含不当内容。',
     createdAt: '2024-01-15 10:00:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/005.txt',
+      title: '文档-005',
+    },
   },
   {
     id: '6',
@@ -52,6 +77,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: '回复：感谢分享，学到了很多！',
     createdAt: '2024-01-15 10:30:00',
+    previewData: {
+      type: 'document',
+      url: 'https://example.com/docs/006.txt',
+      title: '回复-006',
+    },
   },
 ];
 

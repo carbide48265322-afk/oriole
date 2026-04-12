@@ -12,6 +12,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/videos/001.mp4',
     createdAt: '2024-01-15 09:00:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/001.mp4',
+      title: '短视频-001',
+    },
   },
   {
     id: '2',
@@ -20,6 +25,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/videos/002.mp4',
     createdAt: '2024-01-15 09:30:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/002.mp4',
+      title: '直播回放-002',
+    },
   },
   {
     id: '3',
@@ -28,6 +38,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: 'https://example.com/videos/003.mp4',
     createdAt: '2024-01-15 10:00:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/003.mp4',
+      title: '用户上传视频-003',
+    },
   },
   {
     id: '4',
@@ -36,6 +51,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'rejected',
     content: 'https://example.com/videos/004.mp4',
     createdAt: '2024-01-15 10:30:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/004.mp4',
+      title: '广告视频-004',
+    },
   },
   {
     id: '5',
@@ -44,6 +64,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/videos/005.mp4',
     createdAt: '2024-01-15 11:00:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/005.mp4',
+      title: '教学视频-005',
+    },
   },
   {
     id: '6',
@@ -52,6 +77,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/videos/006.mp4',
     createdAt: '2024-01-15 11:30:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/006.mp4',
+      title: '宣传片-006',
+    },
   },
   {
     id: '7',
@@ -60,6 +90,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: 'https://example.com/videos/007.mp4',
     createdAt: '2024-01-15 12:00:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/007.mp4',
+      title: 'vlog-007',
+    },
   },
   {
     id: '8',
@@ -68,6 +103,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'rejected',
     content: 'https://example.com/videos/008.mp4',
     createdAt: '2024-01-15 12:30:00',
+    previewData: {
+      type: 'video',
+      url: 'https://example.com/videos/008.mp4',
+      title: '剪辑视频-008',
+    },
   },
 ];
 

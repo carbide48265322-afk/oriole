@@ -1,6 +1,7 @@
 'use client';
 
 import { Empty, Typography } from 'antd';
+import { AnnotationPreview } from '@/components/annotation';
 import BaseActionBar from './BaseActionBar';
 import type { AuditPreviewProps } from './AuditEngine.types';
 
@@ -27,19 +28,22 @@ export default function AuditPreview({ item, children }: AuditPreviewProps) {
       <div style={{ padding: '8px 0', borderBottom: '1px solid #f0f0f0' }}>
         <BaseActionBar item={item} />
       </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
-        {children || (
-          <Empty
-            description={
-              <Text type="secondary">
-                {item.type === 'image' && '图片预览组件待接入'}
-                {item.type === 'video' && '视频预览组件待接入'}
-                {item.type === 'audio' && '音频预览组件待接入'}
-                {item.type === 'text' && '文本预览组件待接入'}
-              </Text>
-            }
-          />
-        )}
+      <div style={{ flex: 1, overflow: 'hidden' }}>
+        {children ||
+          (item.previewData ? (
+            <AnnotationPreview data={item.previewData} />
+          ) : (
+            <Empty
+              description={
+                <Text type="secondary">
+                  {item.type === 'image' && '图片预览组件待接入'}
+                  {item.type === 'video' && '视频预览组件待接入'}
+                  {item.type === 'audio' && '音频预览组件待接入'}
+                  {item.type === 'text' && '文本预览组件待接入'}
+                </Text>
+              }
+            />
+          ))}
       </div>
     </div>
   );

@@ -23,6 +23,26 @@ describe('AuditEngine.types.ts', () => {
     expect(item.id).toBe('test-1');
     expect(item.type).toBe('image');
     expect(item.status).toBe('pending');
+    expect(item.previewData).toBeUndefined();
+  });
+
+  it('AuditItem 应支持可选的 previewData 字段', () => {
+    const itemWithPreview: AuditItem = {
+      id: 'test-2',
+      type: 'image',
+      title: '测试图片带预览',
+      status: 'pending',
+      content: 'https://example.com/image.jpg',
+      createdAt: '2026-04-12T00:00:00Z',
+      previewData: {
+        type: 'image',
+        url: 'https://example.com/image.jpg',
+        title: '测试图片带预览',
+      },
+    };
+    expect(itemWithPreview.previewData).toBeDefined();
+    expect(itemWithPreview.previewData?.type).toBe('image');
+    expect(itemWithPreview.previewData?.url).toBe('https://example.com/image.jpg');
   });
 
   it('AuditItemType 应仅允许指定类型', () => {

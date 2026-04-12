@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { PreviewData } from '@/components/annotation/AnnotationPreview.types';
 
 /* eslint no-unused-vars: ["warn", { "args": "none" }] */
 
@@ -16,6 +17,7 @@ export interface AuditItem {
   status: AuditItemStatus;
   content: string; // URL 或文本内容
   createdAt: string;
+  previewData?: PreviewData; // 预览数据，用于 AnnotationPreview
 }
 
 // 左侧列表 Props

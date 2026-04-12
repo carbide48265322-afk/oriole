@@ -12,6 +12,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/audios/001.mp3',
     createdAt: '2024-01-15 10:00:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/001.mp3',
+      title: '语音消息-001',
+    },
   },
   {
     id: '2',
@@ -20,6 +25,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/audios/002.mp3',
     createdAt: '2024-01-15 10:30:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/002.mp3',
+      title: '播客片段-002',
+    },
   },
   {
     id: '3',
@@ -28,6 +38,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: 'https://example.com/audios/003.mp3',
     createdAt: '2024-01-15 11:00:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/003.mp3',
+      title: '背景音乐-003',
+    },
   },
   {
     id: '4',
@@ -36,6 +51,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'rejected',
     content: 'https://example.com/audios/004.mp3',
     createdAt: '2024-01-15 11:30:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/004.mp3',
+      title: '语音评论-004',
+    },
   },
   {
     id: '5',
@@ -44,6 +64,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/audios/005.mp3',
     createdAt: '2024-01-15 12:00:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/005.mp3',
+      title: '课程录音-005',
+    },
   },
   {
     id: '6',
@@ -52,6 +77,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'pending',
     content: 'https://example.com/audios/006.mp3',
     createdAt: '2024-01-15 12:30:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/006.mp3',
+      title: '会议录音-006',
+    },
   },
   {
     id: '7',
@@ -60,6 +90,11 @@ const MOCK_ITEMS: AuditItem[] = [
     status: 'approved',
     content: 'https://example.com/audios/007.mp3',
     createdAt: '2024-01-15 13:00:00',
+    previewData: {
+      type: 'audio',
+      url: 'https://example.com/audios/007.mp3',
+      title: '语音通知-007',
+    },
   },
 ];
 
