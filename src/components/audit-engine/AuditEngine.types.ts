@@ -25,6 +25,7 @@ export interface AuditTaskListProps {
   onSelect: (item: AuditItem) => void;
   onSearch?: (keyword: string) => void;
   collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 // 引擎 Props

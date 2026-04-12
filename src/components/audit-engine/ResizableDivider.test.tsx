@@ -32,7 +32,7 @@ describe('ResizableDivider', () => {
     expect(divider).toHaveStyle({ background: '#1677ff' });
   });
 
-  it('拖拽时调用 onResize 回调', () => {
+  it('拖拽时调用 onResize 回调，传入新宽度值', () => {
     const handleResize = vi.fn();
     render(
       <ResizableDivider
@@ -47,7 +47,8 @@ describe('ResizableDivider', () => {
     fireEvent.mouseDown(divider, { clientX: 100 });
     fireEvent.mouseMove(document, { clientX: 120 });
 
-    expect(handleResize).toHaveBeenCalledWith(20);
+    // 新宽度 = 280 + (120 - 100) = 300
+    expect(handleResize).toHaveBeenCalledWith(300);
   });
 
   it('拖拽不超过最小宽度', () => {
@@ -66,8 +67,8 @@ describe('ResizableDivider', () => {
     fireEvent.mouseDown(divider, { clientX: 100 });
     fireEvent.mouseMove(document, { clientX: 50 });
 
-    // 新宽度 = 220 + (-50) = 170, 但最小是 200, 所以 delta = 200 - 220 = -20
-    expect(handleResize).toHaveBeenCalledWith(-20);
+    // 新宽度 = 220 + (50 - 100) = 170, 但最小是 200, 所以传入 200
+    expect(handleResize).toHaveBeenCalledWith(200);
   });
 
   it('拖拽不超过最大宽度', () => {
@@ -86,8 +87,8 @@ describe('ResizableDivider', () => {
     fireEvent.mouseDown(divider, { clientX: 100 });
     fireEvent.mouseMove(document, { clientX: 150 });
 
-    // 新宽度 = 380 + 50 = 430, 但最大是 400, 所以 delta = 400 - 380 = 20
-    expect(handleResize).toHaveBeenCalledWith(20);
+    // 新宽度 = 380 + (150 - 100) = 430, 但最大是 400, 所以传入 400
+    expect(handleResize).toHaveBeenCalledWith(400);
   });
 
   it('鼠标抬起时停止拖拽', () => {

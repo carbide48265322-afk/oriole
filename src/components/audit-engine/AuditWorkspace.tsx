@@ -40,7 +40,7 @@ export default function AuditWorkspace({
   return (
     <div style={{ height: '100%', padding: 16, overflow: 'auto' }}>
       {/* 审核信息 */}
-      <Card size="small" title="审核信息" style={{ marginBottom: 16 }}>
+      <Card data-testid="audit-info-card" size="small" title="审核信息" style={{ marginBottom: 16 }}>
         <Space orientation="vertical" size="small" style={{ width: '100%' }}>
           <div>
             <Text strong>标题：</Text>

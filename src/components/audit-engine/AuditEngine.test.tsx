@@ -55,9 +55,17 @@ describe('AuditEngine', () => {
       />,
     );
 
-    // 验证三栏布局渲染成功
-    const siders = container.querySelectorAll('.ant-layout-sider');
-    expect(siders).toHaveLength(2); // 左右两个 Sider
+    // 验证左侧面板存在（现在是纯 div）
+    const leftPanel = container.querySelector('[style*="position: relative"]');
+    expect(leftPanel).toBeInTheDocument();
+
+    // 验证中间预览区存在 (flex: 1 的 div)
+    const previewArea = container.querySelector('[style*="flex: 1"]');
+    expect(previewArea).toBeInTheDocument();
+
+    // 验证右侧面板存在
+    const rightPanel = container.querySelectorAll('[style*="position: relative"]');
+    expect(rightPanel.length).toBeGreaterThanOrEqual(2); // 左侧和右侧都有
 
     // 验证虚拟列表容器存在
     const virtualContainer = container.querySelector('[style*="position: relative"]');
@@ -196,7 +204,7 @@ describe('AuditEngine', () => {
       />,
     );
 
-    // 全屏按钮应该存在
+    // 全屏按钮应该存在（在顶层 div 中）
     const fullscreenButton = container.querySelector('[aria-label="expand"], [aria-label="compress"]');
     expect(fullscreenButton).toBeInTheDocument();
   });

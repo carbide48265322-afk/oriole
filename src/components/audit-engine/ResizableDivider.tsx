@@ -3,10 +3,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 
 interface ResizableDividerProps {
-  onResize: (delta: number) => void;
+  // eslint-disable-next-line no-unused-vars
+  onResize: (width: number) => void;
   minWidth: number;
   maxWidth: number;
   currentWidth: number;
+  testId?: string;
 }
 
 export default function ResizableDivider({
@@ -14,6 +16,7 @@ export default function ResizableDivider({
   minWidth,
   maxWidth,
   currentWidth,
+  testId,
 }: ResizableDividerProps) {
   const [isDragging, setIsDragging] = useState(false);
   const startXRef = useRef(0);
@@ -45,7 +48,8 @@ export default function ResizableDivider({
         Math.max(startWidthRef.current + delta, minWidth),
         maxWidth,
       );
-      onResizeRef.current(newWidth - startWidthRef.current);
+      // 传入新宽度值，不是 delta
+      onResizeRef.current(newWidth);
     };
 
     const handleMouseUp = () => {
@@ -64,6 +68,7 @@ export default function ResizableDivider({
 
   return (
     <div
+      data-testid={testId}
       onMouseDown={handleMouseDown}
       style={{
         width: 4,

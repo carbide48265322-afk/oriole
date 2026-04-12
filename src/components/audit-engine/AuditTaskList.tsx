@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
-import { Input, Tag, Empty, Typography } from 'antd';
+import { Input, Tag, Empty, Typography, Button } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AuditTaskListProps, AuditItem } from './AuditEngine.types';
 
@@ -29,7 +30,8 @@ export default function AuditTaskList({
   onSelect,
   onSearch,
   collapsed = false,
-}: AuditTaskListProps) {
+  onToggleCollapse,
+}: AuditTaskListProps & { onToggleCollapse?: () => void }) {
   const [keyword, setKeyword] = useState('');
   const scrollElementRef = useRef<HTMLDivElement>(null);
 
@@ -59,42 +61,67 @@ export default function AuditTaskList({
   // 收起状态：只显示图标列表
   if (collapsed) {
     return (
-      <div style={{ height: '100%', overflow: 'auto', padding: '8px 0' }}>
-        {filteredItems.map((item) => {
-          const isSelected = selectedItem?.id === item.id;
-          return (
-            <div
-              key={item.id}
-              onClick={() => onSelect(item)}
-              style={{
-                padding: '12px 8px',
-                background: isSelected ? '#e6f4ff' : 'transparent',
-                borderBottom: '1px solid #f0f0f0',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Tag color={STATUS_CONFIG[item.status].color}>
-                {TYPE_LABELS[item.type].charAt(0)}
-              </Tag>
-            </div>
-          );
-        })}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {/* 收起状态下的展开按钮 */}
+        {onToggleCollapse && (
+          <div style={{ padding: '8px', display: 'flex', justifyContent: 'center' }}>
+            <Button
+              type="text"
+              icon={<MenuUnfoldOutlined />}
+              onClick={onToggleCollapse}
+              size="small"
+            />
+          </div>
+        )}
+        <div style={{ flex: 1, overflow: 'auto', padding: '8px 0' }}>
+          {filteredItems.map((item) => {
+            const isSelected = selectedItem?.id === item.id;
+            return (
+              <div
+                key={item.id}
+                data-testid="audit-list-item"
+                onClick={() => onSelect(item)}
+                style={{
+                  padding: '12px 8px',
+                  background: isSelected ? '#e6f4ff' : 'transparent',
+                  borderBottom: '1px solid #f0f0f0',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Tag color={STATUS_CONFIG[item.status].color}>
+                  {TYPE_LABELS[item.type].charAt(0)}
+                </Tag>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '8px 0' }}>
+      {/* 搜索框和收缩按钮 */}
+      <div style={{ padding: '8px', display: 'flex', alignItems: 'center', gap: 8, minHeight: 40 }}>
         <Input.Search
           placeholder="搜索审核项"
           value={keyword}
           onChange={(e) => handleSearch(e.target.value)}
           allowClear
+          style={{ flex: 1, minWidth: 0 }}
         />
+        {onToggleCollapse && (
+          <Button
+            type="text"
+            icon={<MenuFoldOutlined />}
+            onClick={onToggleCollapse}
+            size="small"
+            style={{ flexShrink: 0 }}
+          />
+        )}
       </div>
       <div ref={scrollElementRef} style={{ flex: 1, overflow: 'auto' }}>
         <div
@@ -111,6 +138,7 @@ export default function AuditTaskList({
             return (
               <div
                 key={item.id}
+                data-testid="audit-list-item"
                 data-index={virtualRow.index}
                 ref={virtualizer.measureElement}
                 onClick={() => onSelect(item)}
