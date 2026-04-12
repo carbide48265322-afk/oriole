@@ -10,11 +10,13 @@ vi.mock('react-pdf', () => {
     onLoadSuccess,
     onLoadError,
     file,
+    loading,
   }: {
     children: React.ReactNode;
-    onLoadSuccess: () => void;
+    onLoadSuccess: (info: { numPages: number }) => void;
     onLoadError: () => void;
     file: string;
+    loading?: React.ReactNode;
   }) => {
     // 模拟加载成功
     if (file === 'error.pdf') {

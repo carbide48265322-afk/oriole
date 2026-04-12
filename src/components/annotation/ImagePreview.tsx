@@ -3,11 +3,16 @@
 import React, { useState } from 'react';
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { Button, Space, Empty } from 'antd';
-import { ZoomInOutlined, ZoomOutOutlined, ReloadOutlined, RotateLeftOutlined } from '@ant-design/icons';
+import {
+  ZoomInOutlined,
+  ZoomOutOutlined,
+  ReloadOutlined,
+  RotateRightOutlined,
+} from '@ant-design/icons';
 import type { ImagePreviewProps } from './AnnotationPreview.types';
 
 export default function ImagePreview({ src, title }: ImagePreviewProps) {
-  const [rotation, setRotation] = useState(0);
+  const [rotate, setRotate] = useState(0);
 
   if (!src) {
     return <Empty description="暂无图片" />;
@@ -22,7 +27,6 @@ export default function ImagePreview({ src, title }: ImagePreviewProps) {
         initialScale={1}
         minScale={0.1}
         maxScale={5}
-        rotation={rotation}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (
           <>
@@ -49,13 +53,16 @@ export default function ImagePreview({ src, title }: ImagePreviewProps) {
                 <Button
                   size="small"
                   icon={<ReloadOutlined />}
-                  onClick={() => resetTransform()}
+                  onClick={() => {
+                    resetTransform();
+                    setRotate(0);
+                  }}
                   aria-label="重置"
                 />
                 <Button
                   size="small"
-                  icon={<RotateLeftOutlined />}
-                  onClick={() => setRotation((prev) => prev - 90)}
+                  icon={<RotateRightOutlined />}
+                  onClick={() => setRotate((prev) => (prev + 90) % 360)}
                   aria-label="旋转"
                 />
               </Space>
@@ -67,16 +74,18 @@ export default function ImagePreview({ src, title }: ImagePreviewProps) {
                 overflow: 'hidden',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={title || '预览图片'}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                }}
-              />
+              <div style={{ transform: `rotate(${rotate}deg)` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={title || '预览图片'}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                  }}
+                />
+              </div>
             </TransformComponent>
           </>
         )}
