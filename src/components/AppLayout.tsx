@@ -38,40 +38,38 @@ interface CustomMenuItem extends Omit<MenuItemType, 'path'> {
   path?: string;
 }
 
-interface CustomMenuGroup {
-  type: 'group';
-  label: React.ReactNode;
+interface CustomMenuSubmenu {
   key: string;
+  icon: React.ReactNode;
+  label: React.ReactNode;
   children: CustomMenuItem[];
 }
 
-type CustomMenuItemType = CustomMenuGroup | CustomMenuItem;
+type CustomMenuItemType = CustomMenuSubmenu | CustomMenuItem;
 
 const { Sider } = Layout;
 const { Text } = Typography;
 
 const sidebarItems: CustomMenuItemType[] = [
+  // 普通菜单项（工作台）
+  { key: 'dashboard', icon: <DashboardOutlined />, label: '工作台', path: '/' },
+
+  // SubMenu（可折叠）- 审核配置
   {
-    type: 'group',
-    label: '工作台',
-    key: 'dashboard-group',
-    children: [
-      { key: 'dashboard', icon: <DashboardOutlined />, label: '工作台', path: '/' },
-    ],
-  },
-  {
-    type: 'group',
+    key: 'audit-config',
+    icon: <SettingOutlined />,
     label: '审核配置',
-    key: 'audit-config-group',
     children: [
       { key: 'audit-policy', icon: <FileTextOutlined />, label: '审核策略', path: '/audit-policy' },
       { key: 'audit-dimension', icon: <AppstoreOutlined />, label: '审核维度', path: '/audit-dimension' },
     ],
   },
+
+  // SubMenu（可折叠）- 审核工作台
   {
-    type: 'group',
+    key: 'audit-workspace',
+    icon: <FileTextOutlined />,
     label: '审核工作台',
-    key: 'audit-workspace-group',
     children: [
       { key: 'tasks', icon: <FileTextOutlined />, label: '审核任务', path: '/tasks' },
       { key: 'ai-review', icon: <RobotOutlined />, label: 'AI 审核', path: '/ai-review' },
@@ -79,10 +77,12 @@ const sidebarItems: CustomMenuItemType[] = [
       { key: 'focus-review', icon: <EyeOutlined />, label: '审核沉浸页', path: '/focus-review' },
     ],
   },
+
+  // SubMenu（可折叠）- 运营管理
   {
-    type: 'group',
+    key: 'ops',
+    icon: <TeamOutlined />,
     label: '运营管理',
-    key: 'ops-group',
     children: [
       { key: 'roles', icon: <TeamOutlined />, label: '角色权限', path: '/roles' },
       { key: 'audit-templates', icon: <AppstoreOutlined />, label: '审核模板', path: '/audit-templates' },
@@ -90,10 +90,12 @@ const sidebarItems: CustomMenuItemType[] = [
       { key: 'blacklist', icon: <StopOutlined />, label: '黑白名单', path: '/blacklist' },
     ],
   },
+
+  // SubMenu（可折叠）- 审核类型
   {
-    type: 'group',
+    key: 'audit-type',
+    icon: <PictureOutlined />,
     label: '审核类型',
-    key: 'audit-type-group',
     children: [
       { key: 'audit-image', icon: <PictureOutlined />, label: '图片审核', path: '/audit/image' },
       { key: 'audit-audio', icon: <SoundOutlined />, label: '音频审核', path: '/audit/audio' },
@@ -101,28 +103,34 @@ const sidebarItems: CustomMenuItemType[] = [
       { key: 'audit-document', icon: <FileTextOutlined />, label: '文档审核', path: '/audit/document' },
     ],
   },
+
+  // SubMenu（可折叠）- 数据报表
   {
-    type: 'group',
+    key: 'reports',
+    icon: <BarChartOutlined />,
     label: '数据报表',
-    key: 'reports-group',
     children: [
       { key: 'stats', icon: <BarChartOutlined />, label: '统计数据', path: '/stats' },
       { key: 'quality-report', icon: <FileSearchOutlined />, label: '质检报表', path: '/reports/quality' },
     ],
   },
+
+  // SubMenu（可折叠）- AI 增强
   {
-    type: 'group',
+    key: 'ai',
+    icon: <CloudServerOutlined />,
     label: 'AI 增强',
-    key: 'ai-group',
     children: [
       { key: 'agent-config', icon: <CloudServerOutlined />, label: 'Agent 配置', path: '/ai/agents' },
       { key: 'pre-review', icon: <PartitionOutlined />, label: '预审结果', path: '/ai/pre-review' },
     ],
   },
+
+  // SubMenu（可折叠）- 其他
   {
-    type: 'group',
+    key: 'other',
+    icon: <SettingOutlined />,
     label: '其他',
-    key: 'other-group',
     children: [
       { key: 'history', icon: <HistoryOutlined />, label: '审核历史', path: '/history' },
       { key: 'settings', icon: <SettingOutlined />, label: '设置', path: '/settings' },
@@ -216,6 +224,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // SubMenu 展开/收起状态
+  const [openKeys, setOpenKeys] = React.useState<string[]>([
+    'audit-config',
+    'audit-workspace',
+    'ops',
+    'audit-type',
+    'reports',
+    'ai',
+    'other',
+  ]);
+
   // 根据当前 pathname 计算 selectedKeys
   const selectedKeys = React.useMemo(() => {
     const key = pathToKeyMap[pathname] || 'dashboard';
@@ -228,6 +247,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     if (path) {
       router.push(path);
     }
+  };
+
+  // SubMenu 展开/收起处理
+  const onOpenChange: MenuProps['onOpenChange'] = (keys) => {
+    setOpenKeys(keys);
   };
 
   const handleLogout = () => {
@@ -281,6 +305,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <Menu
           mode="inline"
           selectedKeys={selectedKeys}
+          openKeys={sidebarCollapsed ? [] : openKeys}
+          onOpenChange={onOpenChange}
           items={sidebarItems as MenuProps['items']}
           onClick={handleMenuClick}
           style={{ borderRight: 'none', marginTop: 8 }}
