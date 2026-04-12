@@ -4,17 +4,19 @@ import { useState } from 'react';
 import AuditEngine from '@/components/audit-engine/AuditEngine';
 import type { AuditItem } from '@/components/audit-engine/AuditEngine.types';
 
+// 使用本地测试音频资源（避免 CORS 问题）
+// 实际项目中，这些 URL 应该来自后端 API
 const MOCK_ITEMS: AuditItem[] = [
   {
     id: '1',
     type: 'audio',
     title: '语音消息-001',
     status: 'pending',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    content: '/assets/test-audio-1.mp3',
     createdAt: '2024-01-15 10:00:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      url: '/assets/test-audio-1.mp3',
       title: '语音消息-001',
     },
   },
@@ -23,11 +25,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '播客片段-002',
     status: 'pending',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    content: '/assets/test-audio-2.mp3',
     createdAt: '2024-01-15 10:30:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+      url: '/assets/test-audio-2.mp3',
       title: '播客片段-002',
     },
   },
@@ -36,11 +38,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '背景音乐-003',
     status: 'approved',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    content: '/assets/test-audio-3.mp3',
     createdAt: '2024-01-15 11:00:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+      url: '/assets/test-audio-3.mp3',
       title: '背景音乐-003',
     },
   },
@@ -49,11 +51,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '语音评论-004',
     status: 'rejected',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+    content: '/assets/test-audio-4.mp3',
     createdAt: '2024-01-15 11:30:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+      url: '/assets/test-audio-4.mp3',
       title: '语音评论-004',
     },
   },
@@ -62,11 +64,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '课程录音-005',
     status: 'pending',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+    content: '/assets/test-audio-5.mp3',
     createdAt: '2024-01-15 12:00:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+      url: '/assets/test-audio-5.mp3',
       title: '课程录音-005',
     },
   },
@@ -75,11 +77,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '会议录音-006',
     status: 'pending',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+    content: '/assets/test-audio-6.mp3',
     createdAt: '2024-01-15 12:30:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+      url: '/assets/test-audio-6.mp3',
       title: '会议录音-006',
     },
   },
@@ -88,11 +90,11 @@ const MOCK_ITEMS: AuditItem[] = [
     type: 'audio',
     title: '语音通知-007',
     status: 'approved',
-    content: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+    content: '/assets/test-audio-7.mp3',
     createdAt: '2024-01-15 13:00:00',
     previewData: {
       type: 'audio',
-      url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+      url: '/assets/test-audio-7.mp3',
       title: '语音通知-007',
     },
   },

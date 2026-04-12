@@ -5,18 +5,24 @@ import WaveSurfer from 'wavesurfer.js';
 import { Button, Space, Empty } from 'antd';
 import { PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import type { AudioPreviewProps } from './AnnotationPreview.types';
+import { getFallbackUrl, isExternalUrl } from '@/lib/test-media';
 
 export default function AudioPreview({ src, title }: AudioPreviewProps) {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
 
   useEffect(() => {
     if (!src || !waveformRef.current) return;
 
     setError(false);
     setIsPlaying(false);
+    setUseFallback(false);
+
+    const isExternal = isExternalUrl(src);
+    const currentSrc = src;
 
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
@@ -31,11 +37,22 @@ export default function AudioPreview({ src, title }: AudioPreviewProps) {
       backend: 'WebAudio',
     });
 
-    wavesurfer.load(src);
+    wavesurfer.load(currentSrc);
 
     wavesurfer.on('play', () => setIsPlaying(true));
     wavesurfer.on('pause', () => setIsPlaying(false));
-    wavesurfer.on('error', () => setError(true));
+    
+    // 监听错误事件，如果加载失败则使用 fallback
+    wavesurfer.on('error', () => {
+      // 如果是外部 URL 且加载失败，尝试使用 fallback
+      if (isExternal && !useFallback) {
+        setUseFallback(true);
+        const fallbackUrl = getFallbackUrl('audio');
+        wavesurfer.load(fallbackUrl);
+      } else {
+        setError(true);
+      }
+    });
 
     wavesurferRef.current = wavesurfer;
 
@@ -45,7 +62,7 @@ export default function AudioPreview({ src, title }: AudioPreviewProps) {
         wavesurferRef.current = null;
       }
     };
-  }, [src]);
+  }, [src, useFallback]);
 
   const togglePlay = () => {
     if (wavesurferRef.current) {
