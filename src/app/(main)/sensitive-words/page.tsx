@@ -1,38 +1,37 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { App, Button, Input, Popconfirm, Select, Space, Switch, Table, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { App, Button, Input, Popconfirm, Select, Space, Table, Tabs, Tag } from 'antd';
+import { PlusOutlined, EditOutlined, DeleteOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
+import type { TabsProps } from 'antd';
 import MockSensitiveWordService from '@/services/mock-sensitive-word';
-import type { SensitiveWord, WordCategory, WordLevel, CreateWordDTO, UpdateWordDTO } from '@/types/sensitive-word';
+import type { SensitiveWord, WordCategory, WordStatus, CreateWordDTO, UpdateWordDTO } from '@/types/sensitive-word';
+import { WORD_CATEGORY_LABELS, WORD_STATUS_LABELS } from '@/types/sensitive-word';
 import StatCards from '@/components/sensitive-word/StatCards';
 import WordForm from '@/components/sensitive-word/WordForm';
 
 const WORDS_QUERY_KEY = ['sensitive-words'];
 const STATS_QUERY_KEY = ['sensitive-word-stats'];
 
+type ActiveTab = 'parent' | 'variant';
+
 const CATEGORY_OPTIONS: { label: string; value: WordCategory | 'all' }[] = [
   { label: '全部分类', value: 'all' },
-  { label: '文字', value: 'text' },
-  { label: '图片', value: 'image' },
-  { label: '视频', value: 'video' },
-  { label: '音频', value: 'audio' },
+  ...Object.entries(WORD_CATEGORY_LABELS).map(([value, label]) => ({
+    label,
+    value: value as WordCategory,
+  })),
 ];
 
 const CATEGORY_TAG_COLOR: Record<WordCategory, string> = {
-  text: 'blue',
-  image: 'green',
-  video: 'orange',
-  audio: 'purple',
-};
-
-const CATEGORY_LABEL: Record<WordCategory, string> = {
-  text: '文字',
-  image: '图片',
-  video: '视频',
-  audio: '音频',
+  politics: 'red',
+  violence: 'orange',
+  porn: 'magenta',
+  ad: 'cyan',
+  abuse: 'gold',
+  other: 'default',
 };
 
 const LEVEL_TAG_COLOR: Record<SensitiveWord['level'], string> = {
@@ -47,15 +46,33 @@ const LEVEL_LABEL: Record<SensitiveWord['level'], string> = {
   low: '低',
 };
 
+const TAB_ITEMS: TabsProps['items'] = [
+  { key: 'parent', label: '母词库' },
+  { key: 'variant', label: '变体词库' },
+];
+
+const STATUS_OPTIONS: { label: string; value: WordStatus }[] = Object.entries(WORD_STATUS_LABELS).map(
+  ([value, label]) => ({
+    label,
+    value: value as WordStatus,
+  })
+);
+
+type FormInitialValues =
+  | SensitiveWord
+  | { type: 'variant'; parentWordId: string }
+  | undefined;
+
 export default function SensitiveWordsPage() {
   const { message } = App.useApp();
   const queryClient = useQueryClient();
 
+  const [activeTab, setActiveTab] = useState<ActiveTab>('parent');
   const [searchText, setSearchText] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<WordCategory | 'all'>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
-  const [editingWord, setEditingWord] = useState<SensitiveWord | undefined>(undefined);
+  const [editingWord, setEditingWord] = useState<FormInitialValues>(undefined);
 
   // 获取敏感词列表
   const {
@@ -74,9 +91,8 @@ export default function SensitiveWordsPage() {
     data: stats = {
       total: 0,
       todayAdded: 0,
-      byCategory: { text: 0, image: 0, video: 0, audio: 0 },
-      byLevel: { high: 0, medium: 0, low: 0 },
       enabled: 0,
+      pending: 0,
       disabled: 0,
     },
   } = useQuery({
@@ -129,9 +145,10 @@ export default function SensitiveWordsPage() {
     },
   });
 
-  // 切换启用/禁用状态
-  const toggleMutation = useMutation({
-    mutationFn: (id: string) => MockSensitiveWordService.toggleEnabled(id),
+  // 更新状态
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: WordStatus }) =>
+      MockSensitiveWordService.updateStatus(id, status),
     onSuccess: () => {
       message.success('状态更新成功');
       queryClient.invalidateQueries({ queryKey: WORDS_QUERY_KEY });
@@ -142,20 +159,22 @@ export default function SensitiveWordsPage() {
     },
   });
 
-  // 搜索和筛选
+  // 根据 Tab 和筛选条件过滤数据
   const filteredWords = useMemo(() => {
     return words.filter((word) => {
+      const matchTab = word.type === activeTab;
       const matchSearch =
         !searchText || word.word.toLowerCase().includes(searchText.toLowerCase());
       const matchCategory = categoryFilter === 'all' || word.category === categoryFilter;
-      return matchSearch && matchCategory;
+      return matchTab && matchSearch && matchCategory;
     });
-  }, [words, searchText, categoryFilter]);
+  }, [words, activeTab, searchText, categoryFilter]);
 
-  const handleCreate = () => {
-    setFormMode('create');
-    setEditingWord(undefined);
-    setFormOpen(true);
+  // 获取母词内容的辅助函数
+  const getParentWord = (parentWordId?: string): string => {
+    if (!parentWordId) return '-';
+    const parent = words.find((w) => w.id === parentWordId);
+    return parent?.word || '-';
   };
 
   const handleEdit = (record: SensitiveWord) => {
@@ -168,16 +187,18 @@ export default function SensitiveWordsPage() {
     deleteMutation.mutate(id);
   };
 
-  const handleToggleEnabled = (id: string, _checked: boolean) => {
-    toggleMutation.mutate(id);
+  const handleCreateVariant = (parentWordId: string) => {
+    setFormMode('create');
+    setEditingWord({ type: 'variant', parentWordId });
+    setFormOpen(true);
   };
 
-  const handleFormSubmit = (values: { word: string; category: WordCategory; level: WordLevel }) => {
+  const handleFormSubmit = (values: CreateWordDTO) => {
     if (formMode === 'create') {
       createMutation.mutateAsync(values).catch(() => {
         // 错误已在 mutation 的 onError 中处理
       });
-    } else if (editingWord) {
+    } else if (editingWord && 'id' in editingWord) {
       updateMutation.mutateAsync({ id: editingWord.id, data: values }).catch(() => {
         // 错误已在 mutation 的 onError 中处理
       });
@@ -187,6 +208,12 @@ export default function SensitiveWordsPage() {
   const handleFormCancel = () => {
     setFormOpen(false);
     setEditingWord(undefined);
+  };
+
+  const handleTabChange = (key: string) => {
+    setActiveTab(key as ActiveTab);
+    setSearchText('');
+    setCategoryFilter('all');
   };
 
   const columns: ColumnsType<SensitiveWord> = [
@@ -201,7 +228,7 @@ export default function SensitiveWordsPage() {
       dataIndex: 'category',
       key: 'category',
       render: (category: WordCategory) => (
-        <Tag color={CATEGORY_TAG_COLOR[category]}>{CATEGORY_LABEL[category]}</Tag>
+        <Tag color={CATEGORY_TAG_COLOR[category]}>{WORD_CATEGORY_LABELS[category]}</Tag>
       ),
     },
     {
@@ -212,17 +239,29 @@ export default function SensitiveWordsPage() {
         <Tag color={LEVEL_TAG_COLOR[level]}>{LEVEL_LABEL[level]}</Tag>
       ),
     },
+    ...(activeTab === 'variant'
+      ? [
+          {
+            title: '母词',
+            dataIndex: 'parentWordId',
+            key: 'parentWord',
+            render: (parentWordId: string | undefined) => (
+              <span>{getParentWord(parentWordId)}</span>
+            ),
+          } as const,
+        ]
+      : []),
     {
       title: '状态',
-      dataIndex: 'enabled',
-      key: 'enabled',
-      render: (enabled: boolean, record: SensitiveWord) => (
-        <Switch
-          checked={enabled}
-          onChange={(checked) => handleToggleEnabled(record.id, checked)}
-          loading={toggleMutation.isPending}
-          checkedChildren="启用"
-          unCheckedChildren="禁用"
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: WordStatus, record: SensitiveWord) => (
+        <Select
+          value={status}
+          style={{ width: 100 }}
+          options={STATUS_OPTIONS}
+          onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
+          loading={updateStatusMutation.isPending}
         />
       ),
     },
@@ -240,6 +279,15 @@ export default function SensitiveWordsPage() {
           <Button type="link" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
             编辑
           </Button>
+          {record.type === 'parent' && (
+            <Button
+              type="link"
+              icon={<PlusCircleOutlined />}
+              onClick={() => handleCreateVariant(record.id)}
+            >
+              创建变体词条
+            </Button>
+          )}
           <Popconfirm
             title="确定要删除此敏感词吗？"
             onConfirm={() => handleDelete(record.id)}
@@ -255,6 +303,10 @@ export default function SensitiveWordsPage() {
     },
   ];
 
+  const handleStatusChange = (id: string, status: WordStatus) => {
+    updateStatusMutation.mutate({ id, status });
+  };
+
   if (wordsError) {
     return (
       <div style={{ padding: 24 }}>
@@ -269,6 +321,9 @@ export default function SensitiveWordsPage() {
     <div style={{ padding: 24 }}>
       {/* 统计卡片区域 */}
       <StatCards stats={stats} />
+
+      {/* Tab 切换 */}
+      <Tabs activeKey={activeTab} items={TAB_ITEMS} onChange={handleTabChange} style={{ marginTop: 24 }} />
 
       {/* 搜索和操作栏 */}
       <div style={{ marginBottom: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -286,7 +341,15 @@ export default function SensitiveWordsPage() {
           onChange={(value) => setCategoryFilter(value)}
           options={CATEGORY_OPTIONS}
         />
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setFormMode('create');
+            setEditingWord(undefined);
+            setFormOpen(true);
+          }}
+        >
           新增
         </Button>
       </div>

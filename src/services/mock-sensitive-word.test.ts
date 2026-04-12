@@ -27,8 +27,8 @@ describe('MockSensitiveWordService', () => {
       expect(words[0]).toHaveProperty('id');
       expect(words[0]).toHaveProperty('word');
       expect(words[0]).toHaveProperty('category');
-      expect(words[0]).toHaveProperty('level');
-      expect(words[0]).toHaveProperty('enabled');
+      expect(words[0]).toHaveProperty('type');
+      expect(words[0]).toHaveProperty('status');
     });
 
     it('应该返回副本而不是原始引用', async () => {
@@ -46,10 +46,11 @@ describe('MockSensitiveWordService', () => {
   });
 
   describe('createWord', () => {
-    it('应该成功创建新敏感词', async () => {
+    it('应该成功创建母词', async () => {
       const dto: CreateWordDTO = {
-        word: '测试敏感词',
-        category: 'text',
+        word: '测试母词',
+        category: 'politics',
+        type: 'parent',
         level: 'medium',
       };
 
@@ -57,19 +58,55 @@ describe('MockSensitiveWordService', () => {
       await flushTimers();
       const result = await promise;
 
-      expect(result.word).toBe('测试敏感词');
-      expect(result.category).toBe('text');
+      expect(result.word).toBe('测试母词');
+      expect(result.category).toBe('politics');
+      expect(result.type).toBe('parent');
       expect(result.level).toBe('medium');
-      expect(result.enabled).toBe(true);
+      expect(result.status).toBe('enabled');
       expect(result.id).toBeDefined();
       expect(result.createdAt).toBeDefined();
       expect(result.updatedAt).toBeDefined();
     });
 
+    it('应该成功创建变体词', async () => {
+      const dto: CreateWordDTO = {
+        word: '测试变体词',
+        category: 'violence',
+        type: 'variant',
+        parentWordId: 'sw_001',
+        level: 'low',
+      };
+
+      const promise = MockSensitiveWordService.createWord(dto);
+      await flushTimers();
+      const result = await promise;
+
+      expect(result.word).toBe('测试变体词');
+      expect(result.category).toBe('violence');
+      expect(result.type).toBe('variant');
+      expect(result.parentWordId).toBe('sw_001');
+      expect(result.level).toBe('low');
+    });
+
+    it('创建变体词不带 parentWordId 应该抛出错误', async () => {
+      const dto: CreateWordDTO = {
+        word: '无效变体词',
+        category: 'porn',
+        type: 'variant',
+        level: 'medium',
+      };
+
+      const promise = MockSensitiveWordService.createWord(dto);
+      await flushTimers();
+
+      await expect(promise).rejects.toThrow('变体词必须关联母词');
+    });
+
     it('创建重复敏感词应该抛出错误', async () => {
       const dto: CreateWordDTO = {
         word: '暴力',
-        category: 'text',
+        category: 'violence',
+        type: 'parent',
         level: 'medium',
       };
 
@@ -82,7 +119,8 @@ describe('MockSensitiveWordService', () => {
     it('创建后应该能查询到新词', async () => {
       const dto: CreateWordDTO = {
         word: '新测试词',
-        category: 'image',
+        category: 'ad',
+        type: 'parent',
         level: 'low',
       };
 
@@ -135,27 +173,41 @@ describe('MockSensitiveWordService', () => {
       const words = await getPromise;
       const targetWord = words[0];
 
-      const dto: UpdateWordDTO = { word: '色情' };
+      const dto: UpdateWordDTO = { word: '暴力' };
 
       const promise = MockSensitiveWordService.updateWord(targetWord.id, dto);
       await flushTimers();
 
-      await expect(promise).rejects.toThrow('敏感词 "色情" 已存在');
+      await expect(promise).rejects.toThrow('敏感词 "暴力" 已存在');
     });
 
-    it('应该更新 enabled 状态', async () => {
+    it('应该更新 status 状态', async () => {
       const getPromise = MockSensitiveWordService.getWords();
       await flushTimers();
       const words = await getPromise;
-      const targetWord = words.find((w) => w.enabled === true)!;
+      const targetWord = words.find((w) => w.status === 'enabled')!;
 
-      const dto: UpdateWordDTO = { enabled: false };
+      const dto: UpdateWordDTO = { status: 'disabled' };
 
       const updatePromise = MockSensitiveWordService.updateWord(targetWord.id, dto);
       await flushTimers();
       const result = await updatePromise;
 
-      expect(result.enabled).toBe(false);
+      expect(result.status).toBe('disabled');
+    });
+
+    it('更新变体词类型不带 parentWordId 应该抛出错误', async () => {
+      const getPromise = MockSensitiveWordService.getWords();
+      await flushTimers();
+      const words = await getPromise;
+      const parentWord = words.find((w) => w.type === 'parent')!;
+
+      const dto: UpdateWordDTO = { type: 'variant' };
+
+      const promise = MockSensitiveWordService.updateWord(parentWord.id, dto);
+      await flushTimers();
+
+      await expect(promise).rejects.toThrow('变体词必须关联母词');
     });
   });
 
@@ -186,27 +238,45 @@ describe('MockSensitiveWordService', () => {
     });
   });
 
-  describe('toggleEnabled', () => {
-    it('应该切换启用状态', async () => {
+  describe('updateStatus', () => {
+    it('应该更新状态为 pending', async () => {
       const getPromise = MockSensitiveWordService.getWords();
       await flushTimers();
       const words = await getPromise;
-      const enabledWord = words.find((w) => w.enabled === true)!;
+      const enabledWord = words.find((w) => w.status === 'enabled')!;
 
-      const togglePromise = MockSensitiveWordService.toggleEnabled(enabledWord.id);
+      const promise = MockSensitiveWordService.updateStatus(enabledWord.id, 'pending');
       await flushTimers();
-      await togglePromise;
+      await promise;
 
       const getPromise2 = MockSensitiveWordService.getWords();
       await flushTimers();
       const wordsAfter = await getPromise2;
       const updatedWord = wordsAfter.find((w) => w.id === enabledWord.id)!;
 
-      expect(updatedWord.enabled).toBe(false);
+      expect(updatedWord.status).toBe('pending');
     });
 
-    it('切换不存在的词应该抛出错误', async () => {
-      const promise = MockSensitiveWordService.toggleEnabled('non_existent_id');
+    it('应该更新状态为 disabled', async () => {
+      const getPromise = MockSensitiveWordService.getWords();
+      await flushTimers();
+      const words = await getPromise;
+      const enabledWord = words.find((w) => w.status === 'enabled')!;
+
+      const promise = MockSensitiveWordService.updateStatus(enabledWord.id, 'disabled');
+      await flushTimers();
+      await promise;
+
+      const getPromise2 = MockSensitiveWordService.getWords();
+      await flushTimers();
+      const wordsAfter = await getPromise2;
+      const updatedWord = wordsAfter.find((w) => w.id === enabledWord.id)!;
+
+      expect(updatedWord.status).toBe('disabled');
+    });
+
+    it('更新不存在的词应该抛出错误', async () => {
+      const promise = MockSensitiveWordService.updateStatus('non_existent_id', 'disabled');
       await flushTimers();
 
       await expect(promise).rejects.toThrow('敏感词不存在');
@@ -220,47 +290,27 @@ describe('MockSensitiveWordService', () => {
       const stats = await promise;
 
       expect(stats.total).toBe(17);
-      expect(stats.byCategory).toHaveProperty('text');
-      expect(stats.byCategory).toHaveProperty('image');
-      expect(stats.byCategory).toHaveProperty('video');
-      expect(stats.byCategory).toHaveProperty('audio');
-      expect(stats.byLevel).toHaveProperty('high');
-      expect(stats.byLevel).toHaveProperty('medium');
-      expect(stats.byLevel).toHaveProperty('low');
-      expect(stats.enabled + stats.disabled).toBe(stats.total);
+      expect(stats.enabled + stats.pending + stats.disabled).toBe(stats.total);
+      expect(stats.todayAdded).toBeGreaterThan(0);
     });
 
-    it('分类统计应该正确', async () => {
+    it('不应该包含 byCategory 和 byLevel 字段', async () => {
       const promise = MockSensitiveWordService.getStats();
       await flushTimers();
       const stats = await promise;
 
-      expect(stats.byCategory.text).toBeGreaterThan(0);
-      expect(stats.byCategory.image).toBeGreaterThan(0);
-      expect(stats.byCategory.video).toBeGreaterThan(0);
-      expect(stats.byCategory.audio).toBeGreaterThan(0);
-
-      const totalFromCategories =
-        stats.byCategory.text +
-        stats.byCategory.image +
-        stats.byCategory.video +
-        stats.byCategory.audio;
-
-      expect(totalFromCategories).toBe(stats.total);
+      expect(stats).not.toHaveProperty('byCategory');
+      expect(stats).not.toHaveProperty('byLevel');
     });
 
-    it('级别统计应该正确', async () => {
+    it('应该包含 enabled, pending, disabled 字段', async () => {
       const promise = MockSensitiveWordService.getStats();
       await flushTimers();
       const stats = await promise;
 
-      expect(stats.byLevel.high).toBeGreaterThan(0);
-      expect(stats.byLevel.medium).toBeGreaterThan(0);
-      expect(stats.byLevel.low).toBeGreaterThan(0);
-
-      const totalFromLevels = stats.byLevel.high + stats.byLevel.medium + stats.byLevel.low;
-
-      expect(totalFromLevels).toBe(stats.total);
+      expect(stats).toHaveProperty('enabled');
+      expect(stats).toHaveProperty('pending');
+      expect(stats).toHaveProperty('disabled');
     });
 
     it('创建新词后统计应该更新', async () => {
@@ -270,7 +320,8 @@ describe('MockSensitiveWordService', () => {
 
       const dto: CreateWordDTO = {
         word: '新统计词',
-        category: 'audio',
+        category: 'ad',
+        type: 'parent',
         level: 'low',
       };
 
@@ -283,9 +334,96 @@ describe('MockSensitiveWordService', () => {
       const statsAfter = await getStatsPromise2;
 
       expect(statsAfter.total).toBe(statsBefore.total + 1);
-      expect(statsAfter.byCategory.audio).toBe(statsBefore.byCategory.audio + 1);
-      expect(statsAfter.byLevel.low).toBe(statsBefore.byLevel.low + 1);
       expect(statsAfter.enabled).toBe(statsBefore.enabled + 1);
+    });
+  });
+
+  describe('createVariant', () => {
+    it('应该成功为母词创建变体词', async () => {
+      const parentWordsPromise = MockSensitiveWordService.getParentWords();
+      await flushTimers();
+      const parentWords = await parentWordsPromise;
+      const parentWord = parentWords[0];
+
+      const promise = MockSensitiveWordService.createVariant(parentWord.id, {
+        word: '新变体词',
+        category: parentWord.category,
+        level: 'medium',
+      });
+      await flushTimers();
+      const result = await promise;
+
+      expect(result.word).toBe('新变体词');
+      expect(result.type).toBe('variant');
+      expect(result.parentWordId).toBe(parentWord.id);
+      expect(result.status).toBe('enabled');
+    });
+
+    it('创建变体词时母词不存在应该抛出错误', async () => {
+      const promise = MockSensitiveWordService.createVariant('non_existent_id', {
+        word: '无效变体词',
+        category: 'politics',
+        level: 'low',
+      });
+      await flushTimers();
+
+      await expect(promise).rejects.toThrow('母词不存在');
+    });
+
+    it('创建重复变体词应该抛出错误', async () => {
+      const parentWordsPromise = MockSensitiveWordService.getParentWords();
+      await flushTimers();
+      const parentWords = await parentWordsPromise;
+      const parentWord = parentWords[0];
+
+      const promise = MockSensitiveWordService.createVariant(parentWord.id, {
+        word: '敏感政治事', // 已存在的词
+        category: 'politics',
+        level: 'low',
+      });
+      await flushTimers();
+
+      await expect(promise).rejects.toThrow('敏感词 "敏感政治事" 已存在');
+    });
+  });
+
+  describe('getParentWords', () => {
+    it('应该返回所有母词', async () => {
+      const promise = MockSensitiveWordService.getParentWords();
+      await flushTimers();
+      const parentWords = await promise;
+
+      expect(parentWords.length).toBeGreaterThan(0);
+      parentWords.forEach((word) => {
+        expect(word.type).toBe('parent');
+      });
+    });
+  });
+
+  describe('getVariants', () => {
+    it('应该返回指定母词的变体词', async () => {
+      const parentWordsPromise = MockSensitiveWordService.getParentWords();
+      await flushTimers();
+      const parentWords = await parentWordsPromise;
+
+      const parentWordId = parentWords[0].id;
+
+      const variantsPromise = MockSensitiveWordService.getVariants(parentWordId);
+      await flushTimers();
+      const variants = await variantsPromise;
+
+      variants.forEach((word) => {
+        expect(word.type).toBe('variant');
+        expect(word.parentWordId).toBe(parentWordId);
+      });
+    });
+
+    it('没有变体词时应该返回空数组', async () => {
+      const promise = MockSensitiveWordService.getVariants('non_existent_parent_id');
+      await flushTimers();
+      const variants = await promise;
+
+      expect(variants).toEqual([]);
     });
   });
 });
