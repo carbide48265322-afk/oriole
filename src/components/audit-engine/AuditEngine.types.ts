@@ -4,7 +4,7 @@ import type { PreviewData } from '@/components/annotation/AnnotationPreview.type
 /* eslint no-unused-vars: ["warn", { "args": "none" }] */
 
 // 审核项类型
-export type AuditItemType = 'image' | 'video' | 'audio' | 'text';
+export type AuditItemType = 'image' | 'video' | 'audio' | 'text' | 'document';
 
 // 审核项状态
 export type AuditItemStatus = 'pending' | 'approved' | 'rejected';

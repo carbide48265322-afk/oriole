@@ -22,6 +22,7 @@ const TYPE_LABELS: Record<AuditItem['type'], string> = {
   video: '视频',
   audio: '音频',
   text: '文本',
+  document: '文档',
 };
 
 export default function AuditTaskList({
