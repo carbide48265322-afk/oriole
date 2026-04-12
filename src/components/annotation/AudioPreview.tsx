@@ -40,8 +40,10 @@ export default function AudioPreview({ src, title }: AudioPreviewProps) {
     wavesurferRef.current = wavesurfer;
 
     return () => {
-      wavesurfer.destroy();
-      wavesurferRef.current = null;
+      if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+        wavesurferRef.current = null;
+      }
     };
   }, [src]);
 
