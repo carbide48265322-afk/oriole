@@ -57,8 +57,16 @@ export default function AudioPreview({ src, title }: AudioPreviewProps) {
     wavesurferRef.current = wavesurfer;
 
     return () => {
-      if (wavesurferRef.current) {
-        wavesurferRef.current.destroy();
+      const ws = wavesurferRef.current;
+      if (ws) {
+        // React 18 严格模式下 useEffect 会执行两次，
+        // 第二次清理时 wavesurfer 内部可能已触发 abort，导致抛出 AbortError。
+        // 安全捕获并忽略即可。
+        try {
+          ws.destroy();
+        } catch {
+          // Ignore AbortError during cleanup
+        }
         wavesurferRef.current = null;
       }
     };
