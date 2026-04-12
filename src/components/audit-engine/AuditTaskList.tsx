@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { List, Input, Tag, Empty, Typography } from 'antd';
+import { useState, useMemo, useRef } from 'react';
+import { Input, Tag, Empty, Typography } from 'antd';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { AuditTaskListProps, AuditItem } from './AuditEngine.types';
 
 const { Text } = Typography;
@@ -27,8 +28,10 @@ export default function AuditTaskList({
   selectedItem,
   onSelect,
   onSearch,
+  collapsed = false,
 }: AuditTaskListProps) {
   const [keyword, setKeyword] = useState('');
+  const scrollElementRef = useRef<HTMLDivElement>(null);
 
   const filteredItems = useMemo(() => {
     if (!keyword) return items;
@@ -42,8 +45,45 @@ export default function AuditTaskList({
     onSearch?.(value);
   };
 
+  const virtualizer = useVirtualizer({
+    count: filteredItems.length,
+    getScrollElement: () => scrollElementRef.current,
+    estimateSize: () => 60,
+    overscan: 5,
+  });
+
   if (items.length === 0) {
     return <Empty description="暂无待审核内容" />;
+  }
+
+  // 收起状态：只显示图标列表
+  if (collapsed) {
+    return (
+      <div style={{ height: '100%', overflow: 'auto', padding: '8px 0' }}>
+        {filteredItems.map((item) => {
+          const isSelected = selectedItem?.id === item.id;
+          return (
+            <div
+              key={item.id}
+              onClick={() => onSelect(item)}
+              style={{
+                padding: '12px 8px',
+                background: isSelected ? '#e6f4ff' : 'transparent',
+                borderBottom: '1px solid #f0f0f0',
+                cursor: 'pointer',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Tag color={STATUS_CONFIG[item.status].color}>
+                {TYPE_LABELS[item.type].charAt(0)}
+              </Tag>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   return (
@@ -56,40 +96,57 @@ export default function AuditTaskList({
           allowClear
         />
       </div>
-      <List
-        dataSource={filteredItems}
-        style={{ flex: 1, overflow: 'auto' }}
-        renderItem={(item: AuditItem) => (
-          <List.Item
-            onClick={() => onSelect(item)}
-            style={{
-              cursor: 'pointer',
-              padding: '12px 16px',
-              background: selectedItem?.id === item.id ? '#e6f4ff' : 'transparent',
-              borderBottom: '1px solid #f0f0f0',
-            }}
-          >
-            <div style={{ width: '100%' }}>
+      <div ref={scrollElementRef} style={{ flex: 1, overflow: 'auto' }}>
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualizer.getVirtualItems().map((virtualRow) => {
+            const item = filteredItems[virtualRow.index] as AuditItem;
+            const isSelected = selectedItem?.id === item.id;
+
+            return (
               <div
+                key={item.id}
+                data-index={virtualRow.index}
+                ref={virtualizer.measureElement}
+                onClick={() => onSelect(item)}
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 4,
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualRow.start}px)`,
+                  padding: '12px 16px',
+                  background: isSelected ? '#e6f4ff' : 'transparent',
+                  borderBottom: '1px solid #f0f0f0',
+                  cursor: 'pointer',
                 }}
               >
-                <Text strong>{item.title}</Text>
-                <Tag color={STATUS_CONFIG[item.status].color}>
-                  {STATUS_CONFIG[item.status].label}
-                </Tag>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text strong>{item.title}</Text>
+                  <Tag color={STATUS_CONFIG[item.status].color}>
+                    {STATUS_CONFIG[item.status].label}
+                  </Tag>
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  {TYPE_LABELS[item.type]}
+                </Text>
               </div>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {TYPE_LABELS[item.type]}
-              </Text>
-            </div>
-          </List.Item>
-        )}
-      />
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

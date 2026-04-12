@@ -18,6 +18,15 @@ export interface AuditItem {
   createdAt: string;
 }
 
+// 左侧列表 Props
+export interface AuditTaskListProps {
+  items: AuditItem[];
+  selectedItem?: AuditItem | null;
+  onSelect: (item: AuditItem) => void;
+  onSearch?: (keyword: string) => void;
+  collapsed?: boolean;
+}
+
 // 引擎 Props
 export interface AuditEngineProps {
   items: AuditItem[];
@@ -26,14 +35,6 @@ export interface AuditEngineProps {
   onSelect: (item: AuditItem) => void;
   onApprove: (id: string) => void;
   onReject: (id: string, reason: string) => void;
-  onSearch?: (keyword: string) => void;
-}
-
-// 左侧列表 Props
-export interface AuditTaskListProps {
-  items: AuditItem[];
-  selectedItem?: AuditItem | null;
-  onSelect: (item: AuditItem) => void;
   onSearch?: (keyword: string) => void;
 }
 

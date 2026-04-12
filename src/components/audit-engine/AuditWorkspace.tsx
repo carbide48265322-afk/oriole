@@ -2,15 +2,12 @@
 
 import { useState } from 'react';
 import { Button, Card, Empty, Input, Space, Typography, Tag } from 'antd';
-import type { AuditWorkspaceProps } from './AuditEngine.types';
+import type { AuditItemStatus, AuditWorkspaceProps } from './AuditEngine.types';
 
 const { Text } = Typography;
 const { TextArea } = Input;
 
-const STATUS_CONFIG: Record<
-  AuditWorkspaceProps['item'] extends { status: infer S } ? S : string,
-  { color: string; label: string }
-> = {
+const STATUS_CONFIG: Record<AuditItemStatus, { color: string; label: string }> = {
   pending: { color: 'orange', label: '待审核' },
   approved: { color: 'green', label: '已通过' },
   rejected: { color: 'red', label: '已拒绝' },
@@ -44,7 +41,7 @@ export default function AuditWorkspace({
     <div style={{ height: '100%', padding: 16, overflow: 'auto' }}>
       {/* 审核信息 */}
       <Card size="small" title="审核信息" style={{ marginBottom: 16 }}>
-        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+        <Space orientation="vertical" size="small" style={{ width: '100%' }}>
           <div>
             <Text strong>标题：</Text>
             <Text>{item.title}</Text>
@@ -75,7 +72,7 @@ export default function AuditWorkspace({
       </Card>
 
       {/* 审核操作 */}
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space orientation="vertical" style={{ width: '100%' }}>
         <Button type="primary" block onClick={() => onApprove(item.id)}>
           通过
         </Button>
