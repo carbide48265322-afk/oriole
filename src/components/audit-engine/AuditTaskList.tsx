@@ -33,7 +33,7 @@ export default function AuditTaskList({
   const [keyword, setKeyword] = useState('');
   const scrollElementRef = useRef<HTMLDivElement>(null);
 
-  const filteredItems = useMemo(() => {
+  const filteredItems = useMemo<AuditItem[]>(() => {
     if (!keyword) return items;
     return items.filter((item) =>
       item.title.toLowerCase().includes(keyword.toLowerCase()),
@@ -105,7 +105,7 @@ export default function AuditTaskList({
           }}
         >
           {virtualizer.getVirtualItems().map((virtualRow) => {
-            const item = filteredItems[virtualRow.index] as AuditItem;
+            const item = filteredItems[virtualRow.index];
             const isSelected = selectedItem?.id === item.id;
 
             return (

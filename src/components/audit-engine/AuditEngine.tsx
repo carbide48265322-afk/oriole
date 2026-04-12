@@ -66,7 +66,7 @@ export default function AuditEngine({
     <div
       style={{
         height: isFullscreen ? '100vh' : 'calc(100vh - 64px)',
-        transition: 'all 0.3s ease-in-out',
+        transition: 'height 0.3s ease-in-out, inset 0.3s ease-in-out, background 0.3s ease-in-out',
         position: isFullscreen ? 'fixed' : 'relative',
         inset: isFullscreen ? 0 : 'auto',
         zIndex: isFullscreen ? 9999 : 1,
