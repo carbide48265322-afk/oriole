@@ -46,6 +46,9 @@ export function useAuth() {
 
   // Supabase 登录
   const login = useCallback(async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase is not initialized');
+    }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data;
@@ -53,6 +56,9 @@ export function useAuth() {
 
   // Supabase 注册
   const register = useCallback(async (email: string, password: string) => {
+    if (!supabase) {
+      throw new Error('Supabase is not initialized');
+    }
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
     return data;
@@ -60,8 +66,10 @@ export function useAuth() {
 
   // Supabase 登出
   const logout = useCallback(async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (supabase) {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    }
     logoutStore();
   }, [supabase, logoutStore]);
 
