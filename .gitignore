@@ -57,3 +57,6 @@ coverage/
 
 # ========== 调试截图 ==========
 test-screenshots/
+
+# ========== 文档文件 ==========
+SUPABASE_INTEGRATION.md
