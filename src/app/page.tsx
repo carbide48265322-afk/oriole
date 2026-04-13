@@ -11,8 +11,8 @@ export default function Home() {
 
   useEffect(() => {
     if (session) {
-      // 已登录，跳转到工作台
-      router.push('/tasks');
+      // 已登录，跳转到图片审核页面
+      router.push('/audit/image');
     } else {
       // 未登录，跳转到登录页面
       router.push('/login');
