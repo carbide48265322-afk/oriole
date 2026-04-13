@@ -254,9 +254,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
     setOpenKeys(keys);
   };
 
-  const handleLogout = () => {
-    logout();
-    // 后续添加跳转逻辑
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
   };
 
   // 更新用户菜单，添加登出处理

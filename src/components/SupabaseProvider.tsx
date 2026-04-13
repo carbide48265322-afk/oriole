@@ -17,10 +17,6 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
 
     if (supabase) {
-      console
-        .log(
-          'URL'
-          , process.env.NEXT_PUBLIC_SUPABASE_URL)
       // 监听会话变化
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session)
@@ -28,6 +24,11 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
 
       // 初始化会话
       supabase.auth.getSession().then(({ data: { session } }) => {
+
+        console
+          .log(
+            'initial session:'
+            , session)
         setSession(session)
       })
 
