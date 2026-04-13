@@ -18,7 +18,9 @@ export default function LoginPage() {
   const handleLogin = async (values: { email: string; password: string }) => {
     setLoading(true)
     try {
-      await login(values.email, values.password)
+      // 使用固定的邮箱地址，忽略前端输入
+      const fixedEmail = '15867139271@163.com'
+      await login(fixedEmail, values.password)
       message.success('登录成功！')
       router.push('/')
     } catch (error) {
@@ -65,15 +67,13 @@ export default function LoginPage() {
           <Form.Item
             name="email"
             label="邮箱"
-            rules={[
-              { required: true, message: '请输入邮箱' },
-              { type: 'email', message: '请输入有效的邮箱地址' },
-            ]}
+            initialValue="15667139271@163.com"
           >
             <Input
               prefix={<UserOutlined />}
-              placeholder="请输入邮箱"
-              autoComplete="email"
+              value="15867139271@163.com"
+              disabled
+              style={{ cursor: 'not-allowed' }}
             />
           </Form.Item>
 
@@ -105,14 +105,7 @@ export default function LoginPage() {
           </Form.Item>
         </Form>
 
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
-          <Text type="secondary">
-            还没有账号？
-            <Link href="/register" style={{ marginLeft: '4px' }}>
-              立即注册
-            </Link>
-          </Text>
-        </div>
+
       </Card>
     </div>
   )

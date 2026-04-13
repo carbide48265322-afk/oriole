@@ -15,26 +15,31 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
 
   useEffect(() => {
-
     if (supabase) {
+      // 初始化会话
+      const initializeSession = async () => {
+        if (!supabase) return
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          console.log('initial session:', session)
+          setSession(session)
+        } catch (error) {
+          console.error('Error getting initial session:', error)
+        }
+      }
+
+      // 立即初始化会话
+      initializeSession()
+
       // 监听会话变化
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        setSession(session)
-      })
-
-      // 初始化会话
-      supabase.auth.getSession().then(({ data: { session } }) => {
-
-        console
-          .log(
-            'initial session:'
-            , session)
+        console.log('auth state changed:', session)
         setSession(session)
       })
 
       return () => subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase])
 
   return (
     <SupabaseContext.Provider value={{ supabase, session }}>
