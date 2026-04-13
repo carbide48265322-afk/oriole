@@ -275,10 +275,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Space style={{ cursor: 'pointer' }}>
         <Avatar
           icon={<UserOutlined />}
-          src={user?.avatar}
           style={{ backgroundColor: '#1677ff' }}
         />
-        <Text style={{ color: '#374151' }}>{user?.name || '未登录'}</Text>
+        <Text style={{ color: '#374151' }}>{user?.email || '未登录'}</Text>
       </Space>
     </Dropdown>
   );
