@@ -63,9 +63,15 @@ export default function AudioPreview({ src, title }: AudioPreviewProps) {
         // 第二次清理时 wavesurfer 内部可能已触发 abort，导致抛出 AbortError。
         // 安全捕获并忽略即可。
         try {
-          ws.destroy();
-        } catch {
-          // Ignore AbortError during cleanup
+          // 检查是否已经销毁
+          if (ws && typeof ws.destroy === 'function') {
+            ws.destroy();
+          }
+        } catch (error) {
+          // 明确忽略 AbortError
+          if (!(error instanceof Error) || error.name !== 'AbortError') {
+            console.error('Error destroying WaveSurfer:', error);
+          }
         }
         wavesurferRef.current = null;
       }

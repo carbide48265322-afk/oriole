@@ -67,7 +67,7 @@ export function DocumentPreviewInner({ file, title }: DocumentPreviewProps) {
       >
         {loading && (
           <div style={{ padding: 48 }}>
-            <Spin size="large" tip="加载文档中..." />
+            <Spin size="large" description="加载文档中..." />
           </div>
         )}
 

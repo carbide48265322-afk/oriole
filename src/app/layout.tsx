@@ -5,6 +5,7 @@ import './globals.css';
 import AntdProvider from '@/components/AntdProvider';
 import QueryProvider from '@/components/QueryProvider';
 import { MockInitializer } from '@/components/MockInitializer';
+import { SupabaseProvider } from '@/components/SupabaseProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -33,8 +34,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <AntdRegistry>
           <QueryProvider>
-            <MockInitializer />
-            <AntdProvider>{children}</AntdProvider>
+            <SupabaseProvider>
+              <MockInitializer />
+              <AntdProvider>{children}</AntdProvider>
+            </SupabaseProvider>
           </QueryProvider>
         </AntdRegistry>
       </body>

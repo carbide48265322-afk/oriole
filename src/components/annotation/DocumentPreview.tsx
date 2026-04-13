@@ -12,7 +12,7 @@ const DynamicDocumentPreviewInner = dynamic(
     ssr: false,
     loading: () => (
       <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Spin size="large" tip="加载文档中..." />
+        <Spin size="large" description="加载文档中..." />
       </div>
     ),
   },
@@ -28,7 +28,7 @@ export default function DocumentPreview(props: DocumentPreviewProps) {
   if (!mounted) {
     return (
       <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Spin size="large" tip="加载文档中..." />
+        <Spin size="large" description="加载文档中..." />
       </div>
     );
   }

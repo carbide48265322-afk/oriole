@@ -7,20 +7,22 @@
 import { useCallback } from 'react';
 import { useAuthStore, useMockUser } from '@/store';
 import type { UserRole } from '@/store/types';
+import { useSupabase } from '@/components/SupabaseProvider';
 
 /**
  * 使用认证状态
  * 
  * @example
- * const { isAuthenticated, user, hasPermission, loginAsMockUser } = useAuth();
+ * const { isAuthenticated, user, hasPermission, login, register, logout } = useAuth();
  */
 export function useAuth() {
+  const { supabase, session } = useSupabase();
   const {
     isAuthenticated,
     user,
     token,
     permissions,
-    logout,
+    logout: logoutStore,
   } = useAuthStore();
 
   // 检查权限
@@ -42,12 +44,35 @@ export function useAuth() {
     [user]
   );
 
+  // Supabase 登录
+  const login = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  }, [supabase]);
+
+  // Supabase 注册
+  const register = useCallback(async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+    return data;
+  }, [supabase]);
+
+  // Supabase 登出
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    logoutStore();
+  }, [supabase, logoutStore]);
+
   return {
-    isAuthenticated,
-    user,
+    isAuthenticated: isAuthenticated || !!session?.user,
+    user: user || session?.user,
     token,
     permissions,
     logout,
+    login,
+    register,
     hasPermission,
     hasRole,
   };
